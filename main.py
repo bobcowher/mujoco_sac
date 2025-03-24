@@ -11,6 +11,7 @@ env.reset()
 
 for i in range(1000):
     action = env.action_space.sample()
-    env.step(action)
+    obs, reward, terminated, truncated, info = env.step(action)
+    # print(f"Obs: {obs} Reward: {reward} Term: {terminated} Trunc: {truncated} Info: {info}")
     env.render()
     time.sleep(0.01)

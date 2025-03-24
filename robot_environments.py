@@ -2,6 +2,7 @@ import gymnasium as gym
 import mujoco
 import mujoco.viewer
 import numpy as np
+import sys
 
 class RoboGymEnv(gym.Env):
 
@@ -9,6 +10,12 @@ class RoboGymEnv(gym.Env):
         model_path = f"robots/{robot}/scene.xml"
         self.model = mujoco.MjModel.from_xml_path(model_path)
         self.data = mujoco.MjData(self.model)
+        self.goal_pos = self.data.xpos[self.model.name2id("goal", mujoco.mjtObj.mjOBJ_BODY)] #
+
+        print(f"self.goal_pos: {self.goal_pos}")
+        sys.exit(1)
+
+        print(self.goal_pos) 
 
         # Viewer setup (non-blocking)
         self.viewer = None
@@ -47,7 +54,10 @@ class RoboGymEnv(gym.Env):
 
     def _compute_reward(self, obs, action):
         # Example: move forward in +x
-        base_pos = self.data.qpos[:3]
+        base_pos = self.data.qpos
+        print(f"Base pos: {base_pos}")
+        print(f"Goal pos: {self.goal_pos}")
+
         return base_pos[0]  # Reward = forward movement
 
     def render(self):
