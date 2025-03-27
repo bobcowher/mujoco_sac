@@ -81,7 +81,7 @@ class RoboGymEnv(gym.Env):
 
         if not done:
             self.current_step += 1
-            if self.current_step > self.max_episode_steps:
+            if self.current_step >= self.max_episode_steps:
                 done = True
 
         return obs, reward, done, truncated, info

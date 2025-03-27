@@ -57,11 +57,9 @@ if __name__ == '__main__':
     automatic_entropy_tuning = False
     hidden_size = 756
     learning_rate = 0.0001
-    horizon=500 # max episode steps
-    human_data_ratio = 0.1
-    live_data_ratio = 1 - human_data_ratio
+    max_episode_steps=1500 # max episode steps
 
-    env = RoboGymEnv(robot="boston_dynamics_spot", max_episode_steps=500)
+    env = RoboGymEnv(robot="boston_dynamics_spot", max_episode_steps=1500)
 
 
     print(env.observation_space.shape[0])
@@ -73,45 +71,15 @@ if __name__ == '__main__':
     # agent.load_checkpoint()
 
     # Tesnorboard
-    episode_identifier = f"Adam - lr: {learning_rate} - Layers: 2 - HL: {hidden_size} - human-clone"
+    episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size}"
 
     writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}')
 
     # Memory
     memory = ReplayBuffer(replay_buffer_size, input_shape=env.observation_space.shape, n_actions=env.action_space.shape[0])
 
-    # # human_memory = ReplayBuffer(replay_buffer_size, input_shape=env.observation_space.shape, n_actions=env.action_space.shape[0])
-
-    # memory.load_from_csv(filename='checkpoints/human_memory.npz')
-
-    # # combined_memory = CombinedReplayBuffer(buffers=[human_memory, memory], percentages=[human_data_ratio, live_data_ratio])
-
     # Training Loop
     total_numsteps = 0
-    # updates = 0
-
-    # print("Starting pre-training")
-    # for i in range(100000):
-    #     policy_loss = agent.pretrain_policy(memory, batch_size=pretrain_batch_size)
-    #     critic_loss = agent.pretrain_critic(memory, batch_size=pretrain_batch_size)
-        
-    #     writer.add_scalar('loss/policy_pre_train', policy_loss, i)
-    #     writer.add_scalar('loss/critic_pre_train', critic_loss, i)
-
-    #     if i % 100 == 0:
-    #         test_score = play_test_round(agent, env, i)
-    #         writer.add_scalar('score/human_clone', test_score, i)
-
-    #     if i % 1000 == 0:
-    #         print(f"Iteration: {i}")
-    #         print(f"loss/policy_pre_train: {policy_loss}, updates: {i}")
-    #         print(f"loss/critic_pre_train: {critic_loss}, updates: {i}")
-    #         agent.save_checkpoint(env_name=env_name)
-        
-    # #     updates += 1
-    
-    # print("Completing pre-training. Beginning live training.")
-
     updates = 0
 
     for i_episode in range(episodes):
@@ -146,7 +114,7 @@ if __name__ == '__main__':
 
             # Ignore the "done" signal if it comes from hitting the time horizon.
             # (https://github.com/openai/spinningup/blob/master/spinup/algos/sac/sac.py)
-            mask = 1 if episode_steps == horizon else float(not done)
+            mask = 1 if episode_steps == max_episode_steps else float(not done)
 
             memory.store_transition(state, action, reward, next_state, mask)  # Append transition to memory
 
