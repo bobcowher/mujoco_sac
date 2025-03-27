@@ -16,6 +16,10 @@ def weights_init_(m):
 
 class QNetwork(nn.Module):
     def __init__(self, num_inputs, num_actions, hidden_dim, checkpoint_dir='checkpoints', name='q_network'):
+
+        print(f"Num inputs: {num_inputs}")
+        print(f"Num actions: {num_actions}")
+
         super(QNetwork, self).__init__()
 
         # Q1 architecture

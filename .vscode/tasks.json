@@ -8,7 +8,7 @@
             "type": "shell",
             "command": "python",
             "args": [
-                "main.py"
+                "train.py"
             ],
             "group": {
                 "kind": "build",

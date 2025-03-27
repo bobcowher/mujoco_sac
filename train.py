@@ -87,7 +87,7 @@ if __name__ == '__main__':
     # # combined_memory = CombinedReplayBuffer(buffers=[human_memory, memory], percentages=[human_data_ratio, live_data_ratio])
 
     # Training Loop
-    # total_numsteps = 0
+    total_numsteps = 0
     # updates = 0
 
     # print("Starting pre-training")
@@ -142,7 +142,7 @@ if __name__ == '__main__':
                     writer.add_scalar('entropy_temprature/alpha', alpha, updates)
                     updates += 1
 
-            next_state, reward, done, _ = env.step(action)  # Step
+            next_state, reward, done, _, _ = env.step(action)  # Step
             episode_steps += 1
             total_numsteps += 1
             episode_reward += reward

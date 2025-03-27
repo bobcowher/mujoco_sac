@@ -27,15 +27,8 @@ class SAC(object):
         self.critic_target = QNetwork(num_inputs, action_space.shape[0], hidden_size).to(self.device)
         hard_update(self.critic_target, self.critic)
 
-        if self.policy_type == "Gaussian":
-            # Target Entropy = −dim(A) (e.g. , -6 for HalfCheetah-v2) as given in the paper
-            if self.automatic_entropy_tuning is True:
-                self.target_entropy = -torch.prod(torch.Tensor(action_space.shape).to(self.device)).item()
-                self.log_alpha = torch.zeros(1, requires_grad=True, device=self.device)
-                self.alpha_optim = Adam([self.log_alpha], lr=learning_rate)
-
-            self.policy = GaussianPolicy(num_inputs, action_space.shape[0], hidden_size, action_space).to(self.device)
-            self.policy_optim = Adam(self.policy.parameters(), lr=learning_rate)
+        self.policy = GaussianPolicy(num_inputs, action_space.shape[0], hidden_size, action_space).to(self.device)
+        self.policy_optim = Adam(self.policy.parameters(), lr=learning_rate)
 
         # else:
         #     self.alpha = 0

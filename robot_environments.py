@@ -6,13 +6,15 @@ import sys
 
 class RoboGymEnv(gym.Env):
 
-    def __init__(self, robot):
+    def __init__(self, robot, max_episode_steps):
         model_path = f"robots/{robot}/scene.xml"
         self.model = mujoco.MjModel.from_xml_path(model_path)
         self.data = mujoco.MjData(self.model)
         self.reset()
         self.success_threshold = 1
+        self.max_episode_steps = max_episode_steps
 #        self.goal_id = self.model.body(name="goal").id
+
 #        self.goal_pos = self.data.xpos[self.goal_id]
 
         print(f"self.goal_pos: {self.goal_pos}")
@@ -24,7 +26,11 @@ class RoboGymEnv(gym.Env):
 
         # Setup action and observation spaces (example: torque control)
         self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(self.model.nu,), dtype=np.float32)
-        obs_dim = self.model.nq + self.model.nv  # Position + velocity
+        obs_dim = self.model.nq + self.model.nv + 3  # Position + velocity + target position
+        # print(f"Obs dim: {obs_dim}"
+        
+        # print(f"Obs dim: {self.model.nq}")
+        # print(f"Obs dim: {self.model.nv}")
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
     def get_body_position(self, name):
