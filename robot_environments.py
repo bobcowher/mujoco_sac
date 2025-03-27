@@ -78,7 +78,7 @@ class RoboGymEnv(gym.Env):
 
     def _get_obs(self):
         # Simple observation: joint pos + vel
-        return np.concatenate([self.data.qpos, self.data.qvel])
+        return np.concatenate([self.data.qpos, self.data.qvel, self.goal_pos])
 
     # def _compute_reward(self, obs, action):
     #     # Example: move forward in +x
