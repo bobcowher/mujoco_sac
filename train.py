@@ -61,7 +61,7 @@ if __name__ == '__main__':
     human_data_ratio = 0.1
     live_data_ratio = 1 - human_data_ratio
 
-    env = RoboGymEnv(robot="boston_dynamics_spot")
+    env = RoboGymEnv(robot="boston_dynamics_spot", max_episode_steps=500)
 
 
     print(env.observation_space.shape[0])
@@ -119,9 +119,6 @@ if __name__ == '__main__':
         episode_steps = 0
         done = False
         state, info = env.reset()
-
-
-        print(state)
 
         while not done:
             

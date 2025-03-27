@@ -50,6 +50,9 @@ class RoboGymEnv(gym.Env):
 
         self.goal_pos = self.get_body_position("goal")
         self.last_distance = self.get_distance_to_goal() 
+
+        self.current_step = 0
+
         # Optional: add randomization here
         return self._get_obs(), {}
 
@@ -69,16 +72,17 @@ class RoboGymEnv(gym.Env):
 
         done = False
 
-        if(current_goal_distance < self.success_threshold):
+        if(current_goal_distance <= self.success_threshold):
             reward += 10
             done = True    
 
         truncated = False    # Set to True if time limit or failure
         info = {}
 
-
-        # print(f"Reward {reward}")
-        # print(f"Current distance to goal: {current_goal_distance}")
+        if not done:
+            self.current_step += 1
+            if self.current_step > self.max_episode_steps:
+                done = True
 
         return obs, reward, done, truncated, info
 
@@ -86,16 +90,6 @@ class RoboGymEnv(gym.Env):
         # Simple observation: joint pos + vel
         return np.concatenate([self.data.qpos, self.data.qvel, self.goal_pos])
 
-    # def _compute_reward(self, obs, action):
-    #     # Example: move forward in +x
-    #     current_distance = self.get_distance_to_goal()
-
-    #     reward = self.last_distance - current_distance
-        
-
-    #     self.last_distance = current_distance
-
-    #     return reward  # Reward = forward movement
 
     def render(self):
         if self.viewer is None:
