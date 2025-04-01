@@ -51,7 +51,7 @@ if __name__ == '__main__':
     updates_per_step = 1
     gamma = 0.99
     tau = 0.005
-    alpha = 0.1 # Temperature parameter.
+    alpha = 0.15 # Temperature parameter.
     policy = "Gaussian"
     target_update_interval = 1
     automatic_entropy_tuning = False
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     # Tesnorboard
     episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size}"
 
-    writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}')
+    writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}_temp={alpha}')
 
     # Memory
     memory = ReplayBuffer(replay_buffer_size, input_shape=env.observation_space.shape, n_actions=env.action_space.shape[0])

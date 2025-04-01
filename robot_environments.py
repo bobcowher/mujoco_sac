@@ -73,8 +73,10 @@ class RoboGymEnv(gym.Env):
         done = False
 
         if(current_goal_distance <= self.success_threshold):
-            reward += 10
-            done = True    
+            reward += 1
+            done = True
+
+        reward = reward * 100    
 
         truncated = False    # Set to True if time limit or failure
         info = {}
