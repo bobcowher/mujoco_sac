@@ -28,7 +28,7 @@ if __name__ == '__main__':
     automatic_entropy_tuning = False
     hidden_size = 756
     learning_rate = 0.0001
-    max_episode_steps=500 # max episode steps
+    max_episode_steps=1500 # max episode steps
 
     env = RoboGymEnv(robot="boston_dynamics_spot", max_episode_steps=max_episode_steps)
 
@@ -64,6 +64,7 @@ if __name__ == '__main__':
             episode_reward += reward
 
             env.render()
+            time.sleep(0.01)
 
             # Ignore the "done" signal if it comes from hitting the time horizon.
             # (https://github.com/openai/spinningup/blob/master/spinup/algos/sac/sac.py)
