@@ -30,6 +30,14 @@
     <body name="step1" pos="1.5 0.3 0.05">
       <geom type="box" size="0.2 0.2 0.05" rgba="0.8 0.8 0 1" />
     </body>
+    
+    <body name="step2" pos="3.5 1.5 0.05">
+      <geom type="box" size="0.2 0.2 0.05" rgba="0.8 0.8 0 1" />
+    </body>
+    
+    <body name="step3" pos="4.5 1.0 0.05">
+      <geom type="box" size="0.2 0.2 0.05" rgba="0.8 0.8 0 1" />
+    </body>
 
     <body name="goal" pos="10.0 0.0 0.05">
       <geom type="sphere" size="0.05" rgba="1 1 0 1" contype="0" conaffinity="0" />
