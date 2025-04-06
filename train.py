@@ -7,62 +7,35 @@ import datetime
 from agent import SAC
 import torch
 from robot_environments import RoboGymEnv
+import sys
 
 from torch.utils.tensorboard import SummaryWriter
 
 
-def play_test_round(agent : SAC, env, iteration : int):
-    episode_reward = 0
-    episode_steps = 0
-    done = False
-    state = env.reset()
-    horizon = 500
-
-    episode_steps = 0
-
-    while not done:
-        action = agent.select_action(state)  # Sample action from policy
-
-        next_state, reward, done, _ = env.step(action)  # Step
-        episode_steps += 1
-        episode_reward += reward
-
-        # Ignore the "done" signal if it comes from hitting the time horizon.
-        # (https://github.com/openai/spinningup/blob/master/spinup/algos/sac/sac.py)
-        mask = 1 if episode_steps == horizon else float(not done)
-
-        memory.store_transition(state, action, reward, next_state, mask)  # Append transition to memory
-
-        state = next_state
-    
-    print(f"Completed test round #{iteration} with a score of {episode_reward}")
-
-    return(episode_reward)
-
-
 if __name__ == '__main__':
 
-    env_name = "Stack"
+    env_name = "boston_dynamics_spot"
     replay_buffer_size = 10000000
-    episodes = 10000
+    episodes = 3000
     warmup = 20
     batch_size = 64
     pretrain_batch_size = 64
     updates_per_step = 1
     gamma = 0.99
     tau = 0.005
-    alpha = 0.15 # Temperature parameter.
+    alpha = 0.1 # Temperature parameter.
     policy = "Gaussian"
     target_update_interval = 1
     automatic_entropy_tuning = False
-    hidden_size = 756
+    hidden_size = 256
     learning_rate = 0.0001
-    max_episode_steps=1500 # max episode steps
+    max_episode_steps=3000 # max episode steps
 
-    env = RoboGymEnv(robot="boston_dynamics_spot", max_episode_steps=1500)
+    env = RoboGymEnv(robot=env_name, max_episode_steps=max_episode_steps)
 
 
     print(env.observation_space.shape[0])
+    
     # Agent
     agent = SAC(env.observation_space.shape[0], env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
                 target_update_interval=target_update_interval, automatic_entropy_tuning=automatic_entropy_tuning,

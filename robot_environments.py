@@ -10,7 +10,7 @@ class RoboGymEnv(gym.Env):
         model_path = f"robots/{robot}/scene.xml"
         self.model = mujoco.MjModel.from_xml_path(model_path)
         self.data = mujoco.MjData(self.model)
-        self.reset()
+        obs, info = self.reset()
         self.success_threshold = 1
         self.max_episode_steps = max_episode_steps
 #        self.goal_id = self.model.body(name="goal").id
@@ -26,7 +26,7 @@ class RoboGymEnv(gym.Env):
 
         # Setup action and observation spaces (example: torque control)
         self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(self.model.nu,), dtype=np.float32)
-        obs_dim = self.model.nq + self.model.nv + 3  # Position + velocity + target position
+        obs_dim = obs.shape[0]  # Position + velocity + target position
         # print(f"Obs dim: {obs_dim}"
         
         # print(f"Obs dim: {self.model.nq}")
@@ -90,7 +90,14 @@ class RoboGymEnv(gym.Env):
 
     def _get_obs(self):
         # Simple observation: joint pos + vel
-        return np.concatenate([self.data.qpos, self.data.qvel, self.goal_pos])
+
+        obs = np.concatenate([self.data.qpos, self.data.qvel, self.goal_pos])
+
+        for i in range(self.model.nbody):
+            if not '_' in self.model.body(i).name:
+                obs = np.concatenate([obs, self.data.xpos[i]])
+
+        return obs 
 
 
     def render(self):

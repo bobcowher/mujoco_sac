@@ -13,7 +13,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 if __name__ == '__main__':
 
-    env_name = "Stack"
+    env_name = "boston_dynamics_spot"
     replay_buffer_size = 10000000
     episodes = 1
     warmup = 20
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     policy = "Gaussian"
     target_update_interval = 1
     automatic_entropy_tuning = False
-    hidden_size = 756
+    hidden_size = 256 
     learning_rate = 0.0001
     max_episode_steps=1500 # max episode steps
 
