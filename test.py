@@ -28,7 +28,7 @@ if __name__ == '__main__':
     automatic_entropy_tuning = False
     hidden_size = 256 
     learning_rate = 0.0001
-    max_episode_steps=1500 # max episode steps
+    max_episode_steps=3000 # max episode steps
 
     env = RoboGymEnv(robot="boston_dynamics_spot", max_episode_steps=max_episode_steps)
 
