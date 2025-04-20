@@ -9,7 +9,7 @@ import time
 
 class SAC(object):
     def __init__(self, num_inputs, action_space, gamma, tau, alpha, policy, target_update_interval,
-                 automatic_entropy_tuning, hidden_size, learning_rate):
+                 automatic_entropy_tuning, hidden_size, learning_rate, alpha_decay):
 
         self.gamma = gamma
         self.tau = tau
@@ -29,6 +29,9 @@ class SAC(object):
 
         self.policy = GaussianPolicy(num_inputs, action_space.shape[0], hidden_size, action_space).to(self.device)
         self.policy_optim = Adam(self.policy.parameters(), lr=learning_rate)
+
+        self.alpha_decay = alpha_decay
+        self.min_alpha = 0.05
 
         # else:
         #     self.alpha = 0
@@ -67,7 +70,7 @@ class SAC(object):
         state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample_buffer(batch_size=batch_size, augment_data=True)
 
         state_batch = torch.FloatTensor(state_batch).to(self.device)
-        action_batch = torch.FloatTensor(action_batch).to(self.device)
+        action_batch = torch.F5oatTensor(action_batch).to(self.device)
         reward_batch = torch.FloatTensor(reward_batch).to(self.device)
         next_state_batch = torch.FloatTensor(next_state_batch).to(self.device)
         mask_batch = torch.FloatTensor(mask_batch).to(self.device)
@@ -150,24 +153,14 @@ class SAC(object):
         policy_loss.backward()
         self.policy_optim.step()
 
-        if self.automatic_entropy_tuning:
-            alpha_loss = -(self.log_alpha * (log_pi + self.target_entropy).detach()).mean()
-
-            self.alpha_optim.zero_grad()
-            alpha_loss.backward()
-            self.alpha_optim.step()
-
-            self.alpha = self.log_alpha.exp()
-            alpha_tlogs = self.alpha.clone() # For TensorboardX logs
-        else:
-            alpha_loss = torch.tensor(0.).to(self.device)
-            alpha_tlogs = torch.tensor(self.alpha) # For TensorboardX logs
-
+        # Update alpha. 
+        if(self.alpha > self.min_alpha and updates % 200 == 0):
+            self.alpha = self.alpha * (1 - (self.alpha_decay * (10 * self.alpha)))
 
         if updates % self.target_update_interval == 0:
             soft_update(self.critic_target, self.critic, self.tau)
 
-        return qf1_loss.item(), qf2_loss.item(), policy_loss.item(), alpha_loss.item(), alpha_tlogs.item()
+        return qf1_loss.item(), qf2_loss.item(), policy_loss.item(), self.alpha 
 
 
     def save_models(self):
