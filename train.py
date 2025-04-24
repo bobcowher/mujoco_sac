@@ -63,8 +63,7 @@ if __name__ == '__main__':
                 batch_size=batch_size, 
                 summary_writer=summary_writer, 
                 max_episode_steps=max_episode_steps,
-                env=env,
-                env_name=env_name)
+                env=env)
 
 
 

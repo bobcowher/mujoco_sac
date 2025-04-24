@@ -41,36 +41,6 @@ if __name__ == '__main__':
 
     agent.load_checkpoint()
 
-    # Memory
-    memory = ReplayBuffer(replay_buffer_size, input_shape=env.observation_space.shape, n_actions=env.action_space.shape[0])
-
-    # Training Loop
-    total_numsteps = 0
-    updates = 0
-
-    for i_episode in range(episodes):
-        episode_reward = 0
-        episode_steps = 0
-        done = False
-        state, info = env.reset()
-
-        while not done:
-            
-            action = agent.select_action(state)  # Sample action from policy
-
-            next_state, reward, done, _, _ = env.step(action)  # Step
-            episode_steps += 1
-            total_numsteps += 1
-            episode_reward += reward
-
-            env.render()
-            time.sleep(0.01)
-
-            # Ignore the "done" signal if it comes from hitting the time horizon.
-            # (https://github.com/openai/spinningup/blob/master/spinup/algos/sac/sac.py)
-
-            state = next_state
-
-
+    agent.test(env=env)
 
     env.close()

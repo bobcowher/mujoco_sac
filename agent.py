@@ -49,7 +49,32 @@ class SAC(object):
         return action.detach().cpu().numpy()[0]
 
 
-    def train(self, episodes, env, memory, updates_per_step, batch_size, summary_writer, max_episode_steps, env_name):
+    def test(self, env):
+    
+        episode_reward = 0
+        episode_steps = 0
+        done = False
+        state, info = env.reset()
+
+        while not done:
+            
+            action = self.select_action(state)  # Sample action from policy
+
+            next_state, reward, done, _, _ = env.step(action)  # Step
+            episode_steps += 1
+            episode_reward += reward
+
+            env.render()
+            time.sleep(0.01)
+
+            # Ignore the "done" signal if it comes from hitting the time horizon.
+            # (https://github.com/openai/spinningup/blob/master/spinup/algos/sac/sac.py)
+
+            state = next_state
+
+        print(f"Test run completed with score {episode_reward}")
+
+    def train(self, episodes, env, memory, updates_per_step, batch_size, summary_writer, max_episode_steps):
         # Training Loop
         total_numsteps = 0
         updates = 0
@@ -157,7 +182,7 @@ class SAC(object):
         self.target_critic_1.save_checkpoint()
         self.target_critic_2.save_checkpoint()
     # Save model parameters
-    def save_checkpoint(self, env_name, suffix=""):
+    def save_checkpoint(self, suffix=""):
         if not os.path.exists('checkpoints/'):
             os.makedirs('checkpoints/')
 
