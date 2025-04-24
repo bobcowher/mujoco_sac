@@ -23,14 +23,15 @@ if __name__ == '__main__':
     updates_per_step = 1
     gamma = 0.99
     tau = 0.005
-    alpha = 0.15 # Temperature parameter.
+    alpha = 0.2 # Temperature parameter.
+    min_alpha = alpha
     policy = "Gaussian"
     target_update_interval = 4
     automatic_entropy_tuning = False
     hidden_size = 256
     learning_rate = 0.0001
     max_episode_steps=3000 # max episode steps
-    alpha_decay = 0.00005
+    alpha_decay = 0.0001
 
     env = RoboGymEnv(robot=env_name, max_episode_steps=max_episode_steps)
 
@@ -40,14 +41,14 @@ if __name__ == '__main__':
     # Agent
     agent = SAC(env.observation_space.shape[0], env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
                 target_update_interval=target_update_interval, automatic_entropy_tuning=automatic_entropy_tuning,
-                hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=alpha_decay)
+                hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=alpha_decay, min_alpha=min_alpha)
 
     # agent.load_checkpoint()
 
     # Tesnorboard
     episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size}"
 
-    writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}_temp={alpha}_ad={alpha_decay}')
+    summary_writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}_temp={alpha}_ad={alpha_decay}_ma={min_alpha}')
 
     # Memory
     memory = ReplayBuffer(replay_buffer_size, input_shape=env.observation_space.shape, n_actions=env.action_space.shape[0])
@@ -56,49 +57,14 @@ if __name__ == '__main__':
     total_numsteps = 0
     updates = 0
 
-    for i_episode in range(episodes):
-        episode_reward = 0
-        episode_steps = 0
-        done = False
-        state, info = env.reset()
-
-        while not done:
-            
-            action = agent.select_action(state)  # Sample action from policy
-
-            if memory.can_sample(batch_size=batch_size):
-                # Number of updates per step in environment
-                for i in range(updates_per_step):
-                    # Update parameters of all the networks
-                    critic_1_loss, critic_2_loss, policy_loss, alpha = agent.update_parameters(memory,
-                                                                                                         batch_size,
-                                                                                                         updates)
-
-                    writer.add_scalar('loss/critic_1', critic_1_loss, updates)
-                    writer.add_scalar('loss/critic_2', critic_2_loss, updates)
-                    writer.add_scalar('loss/policy', policy_loss, updates)
-                    writer.add_scalar('entropy_temprature/alpha', alpha, updates)
-                    updates += 1
-
-            next_state, reward, done, _, _ = env.step(action)  # Step
-            episode_steps += 1
-            total_numsteps += 1
-            episode_reward += reward
-
-            # Ignore the "done" signal if it comes from hitting the time horizon.
-            # (https://github.com/openai/spinningup/blob/master/spinup/algos/sac/sac.py)
-            mask = 1 if episode_steps == max_episode_steps else float(not done)
-
-            memory.store_transition(state, action, reward, next_state, mask)  # Append transition to memory
-
-            state = next_state
-
-        writer.add_scalar('score/live_train', episode_reward, i_episode)
-        print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episode, total_numsteps,
-                                                                                      episode_steps,
-                                                                                      round(episode_reward, 2)))
-        if i_episode % 10 == 0:
-            agent.save_checkpoint(env_name=env_name)
+    agent.train(episodes=episodes, 
+                memory=memory, 
+                updates_per_step=updates_per_step, 
+                batch_size=batch_size, 
+                summary_writer=summary_writer, 
+                max_episode_steps=max_episode_steps,
+                env=env,
+                env_name=env_name)
 
 
 

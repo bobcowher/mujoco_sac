@@ -9,7 +9,7 @@ import time
 
 class SAC(object):
     def __init__(self, num_inputs, action_space, gamma, tau, alpha, policy, target_update_interval,
-                 automatic_entropy_tuning, hidden_size, learning_rate, alpha_decay):
+                 automatic_entropy_tuning, hidden_size, learning_rate, alpha_decay, min_alpha=0.05):
 
         self.gamma = gamma
         self.tau = tau
@@ -31,7 +31,8 @@ class SAC(object):
         self.policy_optim = Adam(self.policy.parameters(), lr=learning_rate)
 
         self.alpha_decay = alpha_decay
-        self.min_alpha = 0.05
+        self.min_alpha = min_alpha
+
 
         # else:
         #     self.alpha = 0
@@ -47,72 +48,53 @@ class SAC(object):
             _, _, action = self.policy.sample(state)
         return action.detach().cpu().numpy()[0]
 
-    def pretrain_policy(self, memory, batch_size):
-        # Sample a batch from memory
-        state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample_buffer(batch_size=batch_size, augment_data=True)
 
-        state_batch = torch.FloatTensor(state_batch).to(self.device)
-        action_batch = torch.FloatTensor(action_batch).to(self.device)
+    def train(self, episodes, env, memory, updates_per_step, batch_size, summary_writer, max_episode_steps, env_name):
+        # Training Loop
+        total_numsteps = 0
+        updates = 0
 
-        pi, log_pi, _ = self.policy.sample(state_batch)
+        for i_episode in range(episodes):
+            episode_reward = 0
+            episode_steps = 0
+            done = False
+            state, info = env.reset()
 
-        # Compute policy loss using MSE with the actions from demonstrations
-        policy_loss = F.mse_loss(pi, action_batch)
+            while not done:
+                
+                action = self.select_action(state)  # Sample action from policy
 
-        self.policy_optim.zero_grad()
-        policy_loss.backward()
-        self.policy_optim.step()
+                if memory.can_sample(batch_size=batch_size):
+                    # Number of updates per step in environment
+                    for i in range(updates_per_step):
+                        # Update parameters of all the networks
+                        critic_1_loss, critic_2_loss, policy_loss, alpha = self.update_parameters(memory, batch_size, updates)
 
-        return policy_loss.item()
+                        summary_writer.add_scalar('loss/critic_1', critic_1_loss, updates)
+                        summary_writer.add_scalar('loss/critic_2', critic_2_loss, updates)
+                        summary_writer.add_scalar('loss/policy', policy_loss, updates)
+                        summary_writer.add_scalar('entropy_temprature/alpha', alpha, updates)
+                        updates += 1
 
-    def pretrain_critic(self, memory, batch_size):
-        # Sample a batch from memory
-        state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample_buffer(batch_size=batch_size, augment_data=True)
+                next_state, reward, done, _, _ = env.step(action)  # Step
+                episode_steps += 1
+                total_numsteps += 1
+                episode_reward += reward
 
-        state_batch = torch.FloatTensor(state_batch).to(self.device)
-        action_batch = torch.F5oatTensor(action_batch).to(self.device)
-        reward_batch = torch.FloatTensor(reward_batch).to(self.device)
-        next_state_batch = torch.FloatTensor(next_state_batch).to(self.device)
-        mask_batch = torch.FloatTensor(mask_batch).to(self.device)
+                # Ignore the "done" signal if it comes from hitting the time horizon.
+                # (https://github.com/openai/spinningup/blob/master/spinup/algos/sac/sac.py)
+                mask = 1 if episode_steps == max_episode_steps else float(not done)
 
-        with torch.no_grad():
-            # Compute Q-values for the next states and actions using the target critic network
-            qf1_next_target, qf2_next_target = self.critic_target(next_state_batch, action_batch)
-            min_qf_next_target = torch.min(qf1_next_target, qf2_next_target)
+                memory.store_transition(state, action, reward, next_state, mask)  # Append transition to memory
 
-            # Calculate the next Q-value target
-            next_q_value = reward_batch.unsqueeze(1) + mask_batch.unsqueeze(1) * self.gamma * min_qf_next_target
+                state = next_state
 
-        # Ensure next_q_value has the correct shape
-        next_q_value = next_q_value.view(batch_size, -1)
-
-        # Get current Q estimates
-        qf1, qf2 = self.critic(state_batch, action_batch)
-
-        # Ensure qf1 and qf2 have the correct shape
-        qf1 = qf1.view(batch_size, -1)
-        qf2 = qf2.view(batch_size, -1)
-
-        # Calculate critic losses
-        qf1_loss = F.mse_loss(qf1, next_q_value)
-        qf2_loss = F.mse_loss(qf2, next_q_value)
-        critic_loss = qf1_loss + qf2_loss
-
-        # Optimize the critic
-        self.critic_optim.zero_grad()
-        critic_loss.backward()
-
-        # Apply gradient clipping
-        torch.nn.utils.clip_grad_norm_(self.critic.parameters(), max_norm=1.0)
-
-        self.critic_optim.step()
-
-        # Update target networks using soft update
-        for target_param, param in zip(self.critic_target.parameters(), self.critic.parameters()):
-            target_param.data.copy_(self.tau * param.data + (1.0 - self.tau) * target_param.data)
-
-        return critic_loss.item()
-
+            summary_writer.add_scalar('score/live_train', episode_reward, i_episode)
+            print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episode, total_numsteps,
+                                                                                        episode_steps,
+                                                                                        round(episode_reward, 2)))
+            if i_episode % 10 == 0:
+                self.save_checkpoint()
 
     def update_parameters(self, memory, batch_size, updates, human=False):
         # Sample a batch from memory
@@ -155,7 +137,11 @@ class SAC(object):
 
         # Update alpha. 
         if(self.alpha > self.min_alpha and updates % 200 == 0):
-            self.alpha = self.alpha * (1 - (self.alpha_decay * (10 * self.alpha)))
+            #self.alpha = self.alpha * (1 - (self.alpha_decay * (10 * self.alpha)))
+            self.alpha = self.alpha * (1 - self.alpha_decay)
+        
+        if(updates % int(5e5) == 0):
+            self.alpha_decay = self.alpha_decay * 0.75
 
         if updates % self.target_update_interval == 0:
             soft_update(self.critic_target, self.critic, self.tau)
