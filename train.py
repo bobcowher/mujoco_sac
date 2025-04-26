@@ -15,7 +15,7 @@ from torch.utils.tensorboard import SummaryWriter
 if __name__ == '__main__':
 
     env_name = "boston_dynamics_spot"
-    replay_buffer_size = 10000000
+    replay_buffer_size = 1000000
     episodes = 3000
     warmup = 20
     batch_size = 64
@@ -23,12 +23,12 @@ if __name__ == '__main__':
     updates_per_step = 1
     gamma = 0.99
     tau = 0.005
-    alpha = 0.2 # Temperature parameter.
+    alpha = 0.05 # Temperature parameter.
     min_alpha = alpha
     policy = "Gaussian"
     target_update_interval = 4
     automatic_entropy_tuning = False
-    hidden_size = 256
+    hidden_size = 64 
     learning_rate = 0.0001
     max_episode_steps=3000 # max episode steps
     alpha_decay = 0.0001
