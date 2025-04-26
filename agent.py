@@ -65,6 +65,12 @@ class SAC(object):
             episode_reward += reward
 
             env.render()
+            env.render(front_camera=True)
+
+            # img = self.sim.render(width=128, height=128, camera_name="front_camera")
+            #img = env._get_image_obs()
+
+
             time.sleep(0.01)
 
             # Ignore the "done" signal if it comes from hitting the time horizon.

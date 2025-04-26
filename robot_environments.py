@@ -3,6 +3,7 @@ import mujoco
 import mujoco.viewer
 import numpy as np
 import sys
+import matplotlib.pyplot as plt
 
 class RoboGymEnv(gym.Env):
 
@@ -13,7 +14,9 @@ class RoboGymEnv(gym.Env):
         obs, info = self.reset()
         self.success_threshold = 1
         self.max_episode_steps = max_episode_steps
-#        self.goal_id = self.model.body(name="goal").id
+        self.renderer = mujoco.Renderer(self.model)
+        
+        #        self.goal_id = self.model.body(name="goal").id
 
 #        self.goal_pos = self.data.xpos[self.goal_id]
 
@@ -88,6 +91,18 @@ class RoboGymEnv(gym.Env):
 
         return obs, reward, done, truncated, info
 
+
+    def _get_image_obs(self):
+        #obs = mujoco._render(self.data, self.model, width=128, height=128, camera="front_camera")
+        self.renderer.update_scene(self.data, camera="front_camera")
+
+        img = self.renderer.render()
+
+        img = np.asarray(img, dtype=np.uint8)
+
+        return img 
+
+
     def _get_obs(self):
         # Simple observation: joint pos + vel
 
@@ -100,10 +115,18 @@ class RoboGymEnv(gym.Env):
         return obs 
 
 
-    def render(self):
-        if self.viewer is None:
-            self.viewer = mujoco.viewer.launch_passive(self.model, self.data).__enter__() 
-        self.viewer.sync()
+    def render(self, front_camera=False):
+
+        if not front_camera:
+           plt.imshow(self._get_image_obs())
+           plt.axis('off')
+           plt.pause(0.0001)
+           plt.clf() 
+        else:
+            if self.viewer is None:
+                self.viewer = mujoco.viewer.launch_passive(self.model, self.data).__enter__() 
+            self.viewer.sync()
+
 
     def close(self):
         if self.viewer:

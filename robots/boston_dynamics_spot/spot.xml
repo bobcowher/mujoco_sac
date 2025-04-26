@@ -125,6 +125,9 @@
             <geom name="HL" class="foot"/>
           </body>
         </body>
+        <body name="front_camera_mount" pos="0.5 0 0.3">
+          <camera name="front_camera" pos="0 0 0" xyaxes="1 0 0 0 0.866 -0.5" />
+        </body>
       </body>
       <body name="hr_hip" pos="-0.29785 -0.055 0">
         <inertial pos="0.00537435 -0.0128418 9.87523e-05" quat="1 1 -1 1" mass="1.68"
