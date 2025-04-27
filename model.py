@@ -22,6 +22,14 @@ class QNetwork(nn.Module):
 
         super(QNetwork, self).__init__()
 
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=8, kernel_size=4, stride=2)
+        self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=4, stride=2)
+        self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2)  # Third convolutional layer
+        self.conv4 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=2)
+
+        # Pool Layer
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+
         # Q1 architecture
         self.linear1 = nn.Linear(num_inputs + num_actions, hidden_dim * 2)
         self.linear2 = nn.Linear(hidden_dim * 2, hidden_dim)
@@ -38,14 +46,37 @@ class QNetwork(nn.Module):
 
         self.apply(weights_init_)
 
-    def forward(self, state, action):
-        xu = torch.cat([state, action], 1)
-        
-        x1 = F.relu(self.linear1(xu))
+    def calculate_conv_output(self, observation_shape):
+        x = torch.zeros(1, *observation_shape)
+        x = self.pool(F.relu(self.conv1(x)))  # Pooling after first conv layer
+        x = F.relu(self.conv2(x))             # No pooling after second to control size
+        x = self.pool(F.relu(self.conv3(x)))  # Pooling after third conv layer
+        x = F.relu(self.conv4(x))             # No pooling after second to control size
+
+        return x.view(-1).shape[0]
+
+    def forward(self, obs, action):
+
+        camera_obs = obs['camera']
+        joint_pos = obs['joint_pos']
+        joint_vel = obs['joint_vel']        
+
+        x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
+        x = x.float() / 255.0
+
+        x = self.pool(F.relu(self.conv1(x)))
+        x = F.relu(self.conv2(x))
+        x = self.pool(F.relu(self.conv3(x))) 
+        x = F.relu(self.conv4(x)) 
+        x = x.view(x.size(0), -1)  
+
+        x = torch.cat([x, joint_pos, joint_vel, action])
+
+        x1 = F.relu(self.linear1(x))
         x1 = F.relu(self.linear2(x1))
         x1 = self.linear3(x1)
 
-        x2 = F.relu(self.linear4(xu))
+        x2 = F.relu(self.linear4(x))
         x2 = F.relu(self.linear5(x2))
         x2 = self.linear6(x2)
 
@@ -85,8 +116,24 @@ class GaussianPolicy(nn.Module):
             self.action_bias = torch.FloatTensor(
                 (action_space.high + action_space.low) / 2.)
 
-    def forward(self, state):
-        x = F.relu(self.linear1(state))
+    def forward(self, obs):
+
+        camera_obs = obs['camera']
+        joint_pos = obs['joint_pos']
+        joint_vel = obs['joint_vel']        
+
+        x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
+        x = x.float() / 255.0
+
+        x = self.pool(F.relu(self.conv1(x)))
+        x = F.relu(self.conv2(x))
+        x = self.pool(F.relu(self.conv3(x))) 
+        x = F.relu(self.conv4(x)) 
+        x = x.view(x.size(0), -1)  
+
+        x = torch.cat([x, joint_pos, joint_vel])
+
+        x = F.relu(self.linear1(x))
         x = F.relu(self.linear2(x))
         x = F.relu(self.linear3(x))
         mean = self.mean_linear(x)

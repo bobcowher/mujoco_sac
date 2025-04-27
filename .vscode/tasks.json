@@ -8,7 +8,7 @@
             "type": "shell",
             "command": "python",
             "args": [
-                "test.py"
+                "testsuite.py"
             ],
             "group": {
                 "kind": "build",
