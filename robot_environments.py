@@ -94,11 +94,15 @@ class RoboGymEnv(gym.Env):
 
     def _get_image_obs(self):
         #obs = mujoco._render(self.data, self.model, width=128, height=128, camera="front_camera")
-        self.renderer.update_scene(self.data, camera="front_camera")
+        self.renderer.update_scene(self.data, camera="forward_camera")
+        front_img = self.renderer.render()
+        
+        self.renderer.update_scene(self.data, camera="down_camera")
+        bottom_img = self.renderer.render()
 
-        img = self.renderer.render()
+        img = np.concatenate([front_img, bottom_img], dtype=np.uint8)
 
-        img = np.asarray(img, dtype=np.uint8)
+        # img = np.asarray(img, dtype=np.uint8)
 
         return img 
 

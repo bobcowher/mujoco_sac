@@ -57,8 +57,13 @@
   <worldbody>
     <light name="spotlight" mode="targetbodycom" target="body" pos="3 0 4" cutoff="30"/>
     <body name="body" childclass="spot" pos="0 0 .75">
-      <body name="front_camera_mount" pos="0 -0.4 0.35">
-        <camera name="front_camera" pos="0 0 0" xyaxes="0 -1 0 0 0 1"/>
+      <!-- <body name="front_camera_mount" pos="-0.1 0 0.65" quat="0.9848 0 0.1736 0"> -->
+      <body name="front_camera_mount" pos="0 0 0.3" quat="0.9914 0 0.1305 0">
+        <camera name="forward_camera" pos="0 0 0" xyaxes="0 -1 0 0 0 1"/>
+      </body>
+      
+      <body name="down_camera_mount" pos="0.4 0 0" quat="0.6 0 0.4 0">
+        <camera name="down_camera" pos="0 0 0" xyaxes="0 -1 0 0 0 1"/>
       </body>
     
 
