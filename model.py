@@ -25,18 +25,17 @@ class QNetwork(nn.Module):
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=8, kernel_size=4, stride=2)
         self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=4, stride=2)
         self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2)  # Third convolutional layer
-        self.conv4 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=2)
 
         # Pool Layer
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # Q1 architecture
-        self.linear1 = nn.Linear(num_inputs + num_actions, hidden_dim * 2)
+        self.linear1 = nn.Linear(4081, hidden_dim * 2)
         self.linear2 = nn.Linear(hidden_dim * 2, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, 1)
 
         # Q2 architecture
-        self.linear4 = nn.Linear(num_inputs + num_actions, hidden_dim * 2)
+        self.linear4 = nn.Linear(4081, hidden_dim * 2)
         self.linear5 = nn.Linear(hidden_dim * 2, hidden_dim)
         self.linear6 = nn.Linear(hidden_dim, 1)
 
@@ -48,29 +47,34 @@ class QNetwork(nn.Module):
 
     def calculate_conv_output(self, observation_shape):
         x = torch.zeros(1, *observation_shape)
-        x = self.pool(F.relu(self.conv1(x)))  # Pooling after first conv layer
-        x = F.relu(self.conv2(x))             # No pooling after second to control size
-        x = self.pool(F.relu(self.conv3(x)))  # Pooling after third conv layer
-        x = F.relu(self.conv4(x))             # No pooling after second to control size
+        x = self.pool(F.relu(self.conv1(x))) 
+        x = self.pool(F.relu(self.conv2(x)))
+        x = F.relu(self.conv3(x))
 
         return x.view(-1).shape[0]
 
     def forward(self, obs, action):
 
-        camera_obs = obs['camera']
-        joint_pos = obs['joint_pos']
-        joint_vel = obs['joint_vel']        
+        camera_obs = obs['camera'].float()
+        joint_pos = obs['joint_pos'].float()
+        joint_vel = obs['joint_vel'].float() 
 
         x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
-        x = x.float() / 255.0
+        x = x / 255.0
 
         x = self.pool(F.relu(self.conv1(x)))
-        x = F.relu(self.conv2(x))
-        x = self.pool(F.relu(self.conv3(x))) 
-        x = F.relu(self.conv4(x)) 
-        x = x.view(x.size(0), -1)  
+        x = self.pool(F.relu(self.conv2(x)))
+        x = F.relu(self.conv3(x)) 
 
-        x = torch.cat([x, joint_pos, joint_vel, action])
+        print(f"X Shape before reshape: {x.shape}")
+        x = x.reshape(x.size(0), -1)
+
+        print(f"X Shape: {x.shape}")
+        print(f"joint_pos shape: {joint_pos.shape}")
+        print(f"joint_vel shape: {joint_vel.shape}")
+        print(f"Action Shape: {action.shape}")
+
+        x = torch.cat([x, joint_pos, joint_vel, action], dim=1)
 
         x1 = F.relu(self.linear1(x))
         x1 = F.relu(self.linear2(x1))
@@ -97,14 +101,13 @@ class GaussianPolicy(nn.Module):
         # Convolutional layers
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=8, kernel_size=4, stride=2)
         self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=4, stride=2)
-        self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2)  # Third convolutional layer
-        self.conv4 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=2)
+        self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2)
 
         # Pooling layer.  
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
         
         # FC Layers
-        self.linear1 = nn.Linear(num_inputs, hidden_dim)
+        self.linear1 = nn.Linear(4069, hidden_dim) # Make this dynamic
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, hidden_dim)
 
@@ -129,20 +132,19 @@ class GaussianPolicy(nn.Module):
 
     def forward(self, obs):
 
-        camera_obs = obs['camera']
-        joint_pos = obs['joint_pos']
-        joint_vel = obs['joint_vel']        
+        camera_obs = obs['camera'].float()
+        joint_pos = obs['joint_pos'].float()
+        joint_vel = obs['joint_vel'].float()
 
         x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
-        x = x.float() / 255.0
+        x = x / 255.0
 
         x = self.pool(F.relu(self.conv1(x)))
-        x = F.relu(self.conv2(x))
-        x = self.pool(F.relu(self.conv3(x))) 
-        x = F.relu(self.conv4(x)) 
-        x = x.view(x.size(0), -1)  
-
-        x = torch.cat([x, joint_pos, joint_vel])
+        x = self.pool(F.relu(self.conv2(x)))
+        x = F.relu(self.conv3(x)) 
+        x = x.reshape(x.size(0), -1)
+ 
+        x = torch.cat([x, joint_pos, joint_vel], dim=1)
 
         x = F.relu(self.linear1(x))
         x = F.relu(self.linear2(x))

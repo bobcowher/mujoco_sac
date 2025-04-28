@@ -35,6 +35,14 @@ if __name__ == '__main__':
 
     env = RoboGymEnv(robot=env_name, max_episode_steps=max_episode_steps)
 
+    state, info = env.reset()
+
+
+    print("Camera OBS Shape:", state['camera'].shape)
+    print(state['camera'])
+    print(state['joint_pos'])
+    print(state['joint_vel'])
+    sys.exit(1)
 
     print(env.observation_space.shape[0])
     
