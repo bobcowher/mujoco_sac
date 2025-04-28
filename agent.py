@@ -41,7 +41,8 @@ class SAC(object):
         #     self.policy_optim = Adam(self.policy.parameters(), lr=learning_rate)
 
     def select_action(self, state, evaluate=False):
-        state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
+        # state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
+        state = torch.Tensor(state).to(self.device).unsqueeze(0)
         if evaluate is False:
             action, _, _ = self.policy.sample(state)
         else:

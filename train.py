@@ -2,7 +2,7 @@ import time
 import os
 import gym
 import numpy as np
-from buffer import ReplayBuffer, CombinedReplayBuffer
+from buffer import ReplayBuffer 
 import datetime
 from agent import SAC
 import torch
@@ -38,11 +38,13 @@ if __name__ == '__main__':
     state, info = env.reset()
 
 
-    print("Camera OBS Shape:", state['camera'].shape)
-    print(state['camera'])
-    print(state['joint_pos'])
-    print(state['joint_vel'])
-    sys.exit(1)
+    # print("Camera OBS Shape:", state['camera'].shape)
+    # print(state['camera'])
+    # print(state['joint_pos'])
+    # print(state['joint_vel'])
+    # sys.exit(1)
+
+    # print(f"State shape: {state.shape}")
 
     print(env.observation_space.shape[0])
     
@@ -59,7 +61,11 @@ if __name__ == '__main__':
     summary_writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}_temp={alpha}_ad={alpha_decay}_ma={min_alpha}')
 
     # Memory
-    memory = ReplayBuffer(replay_buffer_size, input_shape=env.observation_space.shape, n_actions=env.action_space.shape[0])
+    memory = ReplayBuffer(replay_buffer_size, 
+                          camera_shape=state['camera'].shape, 
+                          joint_pos_dim=state['joint_pos'].shape,
+                          joint_vel_dim=state['joint_vel'].shape,  
+                          n_actions=env.action_space.shape[0])
 
     # Training Loop
     total_numsteps = 0
