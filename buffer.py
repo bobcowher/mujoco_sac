@@ -19,6 +19,8 @@ class ReplayBuffer:
         self.action_memory = torch.zeros((self.mem_size, n_actions), dtype=torch.float32, device=self.device)
         self.reward_memory = torch.zeros(self.mem_size, dtype=torch.float32, device=self.device)
         self.terminal_memory = torch.zeros(self.mem_size, dtype=torch.bool, device=self.device)
+        
+        print(f"Created buffer with size {self.get_size()} GB")
 
     def can_sample(self, batch_size):
         return self.mem_ctr > (batch_size * 5)
@@ -70,3 +72,22 @@ class ReplayBuffer:
         states['joint_pos'] += noise_ratio * torch.randn_like(states['joint_pos'])
         states['joint_vel'] += noise_ratio * torch.randn_like(states['joint_vel'])
         return states
+
+
+    def get_size(self):
+        """Returns size in GB of the replay buffer"""
+        total_bytes = 0
+
+        # Add up the bytes used by each tensor
+        for key in self.state_memory:
+            total_bytes += self.state_memory[key].element_size() * self.state_memory[key].nelement()
+
+        for key in self.new_state_memory:
+            total_bytes += self.new_state_memory[key].element_size() * self.new_state_memory[key].nelement()
+
+        total_bytes += self.action_memory.element_size() * self.action_memory.nelement()
+        total_bytes += self.reward_memory.element_size() * self.reward_memory.nelement()
+        total_bytes += self.terminal_memory.element_size() * self.terminal_memory.nelement()
+
+        total_gb = total_bytes / (1024**3)  # bytes → gigabytes
+        return total_gb

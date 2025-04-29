@@ -9,7 +9,7 @@ import time
 
 class SAC(object):
     def __init__(self, num_inputs, action_space, gamma, tau, alpha, policy, target_update_interval,
-                 automatic_entropy_tuning, hidden_size, learning_rate, alpha_decay, min_alpha=0.05):
+                 automatic_entropy_tuning, hidden_size, learning_rate, alpha_decay, device, min_alpha=0.05):
 
         self.gamma = gamma
         self.tau = tau
@@ -19,7 +19,7 @@ class SAC(object):
         self.target_update_interval = target_update_interval
         self.automatic_entropy_tuning = automatic_entropy_tuning
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = device 
 
         self.critic = QNetwork(num_inputs, action_space.shape[0], hidden_size).to(device=self.device)
         self.critic_optim = AdamW(self.critic.parameters(), lr=0.001)
@@ -42,12 +42,20 @@ class SAC(object):
 
     def select_action(self, state, evaluate=False):
         # state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
-        state = torch.Tensor(state).to(self.device).unsqueeze(0)
+        # state = state.to(self.device).unsqueeze(0)
         if evaluate is False:
             action, _, _ = self.policy.sample(state)
         else:
             _, _, action = self.policy.sample(state)
         return action.detach().cpu().numpy()[0]
+
+
+    def obs_to_tensor(self, obs):
+        return {
+            'camera': torch.from_numpy(obs['camera']).unsqueeze(0).to(self.device),
+            'joint_pos': torch.from_numpy(obs['joint_pos']).unsqueeze(0).to(self.device),
+            'joint_vel': torch.from_numpy(obs['joint_vel']).unsqueeze(0).to(self.device)
+        }
 
 
     def test(self, env):
@@ -94,7 +102,7 @@ class SAC(object):
 
             while not done:
                 
-                action = self.select_action(state)  # Sample action from policy
+                action = self.select_action(self.obs_to_tensor(obs=state))  # Sample action from policy
 
                 if memory.can_sample(batch_size=batch_size):
                     # Number of updates per step in environment
@@ -132,11 +140,11 @@ class SAC(object):
         # Sample a batch from memory
         state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample_buffer(batch_size=batch_size)
 
-        state_batch = torch.FloatTensor(state_batch).to(self.device)
-        next_state_batch = torch.FloatTensor(next_state_batch).to(self.device)
-        action_batch = torch.FloatTensor(action_batch).to(self.device)
-        reward_batch = torch.FloatTensor(reward_batch).to(self.device).unsqueeze(1)
-        mask_batch = torch.FloatTensor(mask_batch).to(self.device).unsqueeze(1)
+        # state_batch = state_batch.to(self.device)
+        # next_state_batch = next_state_batch.to(self.device)
+        # action_batch = action_batch.to(self.device)
+        reward_batch = reward_batch.unsqueeze(1)
+        mask_batch = mask_batch.unsqueeze(1)
 
         with torch.no_grad():
             next_state_action, next_state_log_pi, _ = self.policy.sample(next_state_batch)
@@ -145,6 +153,8 @@ class SAC(object):
             next_q_value = reward_batch + mask_batch * self.gamma * (min_qf_next_target)
 
         qf1, qf2 = self.critic(state_batch, action_batch)  # Two Q-functions to mitigate positive bias in the policy improvement step
+        #print(f"qf1 {qf1.shape}")
+        #print(f"next_q_values {next_q_value.shape}")
         qf1_loss = F.mse_loss(qf1, next_q_value)  # JQ = 𝔼(st,at)~D[0.5(Q1(st,at) - r(st,at) - γ(𝔼st+1~p[V(st+1)]))^2]
         qf2_loss = F.mse_loss(qf2, next_q_value)  # JQ = 𝔼(st,at)~D[0.5(Q1(st,at) - r(st,at) - γ(𝔼st+1~p[V(st+1)]))^2]
         qf_loss = qf1_loss + qf2_loss

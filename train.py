@@ -15,7 +15,7 @@ from torch.utils.tensorboard import SummaryWriter
 if __name__ == '__main__':
 
     env_name = "boston_dynamics_spot"
-    replay_buffer_size = 1000000
+    replay_buffer_size = 120000
     episodes = 3000
     warmup = 20
     batch_size = 64
@@ -32,6 +32,8 @@ if __name__ == '__main__':
     learning_rate = 0.0001
     max_episode_steps=3000 # max episode steps
     alpha_decay = 0.0001
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     env = RoboGymEnv(robot=env_name, max_episode_steps=max_episode_steps)
 
@@ -51,7 +53,8 @@ if __name__ == '__main__':
     # Agent
     agent = SAC(env.observation_space.shape[0], env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
                 target_update_interval=target_update_interval, automatic_entropy_tuning=automatic_entropy_tuning,
-                hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=alpha_decay, min_alpha=min_alpha)
+                hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=alpha_decay, min_alpha=min_alpha,
+                device=device)
 
     # agent.load_checkpoint()
 
@@ -60,12 +63,15 @@ if __name__ == '__main__':
 
     summary_writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}_temp={alpha}_ad={alpha_decay}_ma={min_alpha}')
 
+
+
     # Memory
     memory = ReplayBuffer(replay_buffer_size, 
                           camera_shape=state['camera'].shape, 
-                          joint_pos_dim=state['joint_pos'].shape,
-                          joint_vel_dim=state['joint_vel'].shape,  
-                          n_actions=env.action_space.shape[0])
+                          joint_pos_dim=state['joint_pos'].shape[0],
+                          joint_vel_dim=state['joint_vel'].shape[0],  
+                          n_actions=env.action_space.shape[0],
+                          device=device)
 
     # Training Loop
     total_numsteps = 0

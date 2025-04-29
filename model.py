@@ -30,12 +30,12 @@ class QNetwork(nn.Module):
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # Q1 architecture
-        self.linear1 = nn.Linear(4081, hidden_dim * 2)
+        self.linear1 = nn.Linear(305, hidden_dim * 2)
         self.linear2 = nn.Linear(hidden_dim * 2, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, 1)
 
         # Q2 architecture
-        self.linear4 = nn.Linear(4081, hidden_dim * 2)
+        self.linear4 = nn.Linear(305, hidden_dim * 2)
         self.linear5 = nn.Linear(hidden_dim * 2, hidden_dim)
         self.linear6 = nn.Linear(hidden_dim, 1)
 
@@ -66,13 +66,13 @@ class QNetwork(nn.Module):
         x = self.pool(F.relu(self.conv2(x)))
         x = F.relu(self.conv3(x)) 
 
-        print(f"X Shape before reshape: {x.shape}")
+        #print(f"X Shape before reshape: {x.shape}")
         x = x.reshape(x.size(0), -1)
 
-        print(f"X Shape: {x.shape}")
-        print(f"joint_pos shape: {joint_pos.shape}")
-        print(f"joint_vel shape: {joint_vel.shape}")
-        print(f"Action Shape: {action.shape}")
+        #print(f"X Shape: {x.shape}")
+        #print(f"joint_pos shape: {joint_pos.shape}")
+        #print(f"joint_vel shape: {joint_vel.shape}")
+        #print(f"Action Shape: {action.shape}")
 
         x = torch.cat([x, joint_pos, joint_vel, action], dim=1)
 
@@ -107,7 +107,7 @@ class GaussianPolicy(nn.Module):
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
         
         # FC Layers
-        self.linear1 = nn.Linear(4069, hidden_dim) # Make this dynamic
+        self.linear1 = nn.Linear(293, hidden_dim) # Make this dynamic
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, hidden_dim)
 

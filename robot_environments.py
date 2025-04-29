@@ -4,6 +4,7 @@ import mujoco.viewer
 import numpy as np
 import sys
 import matplotlib.pyplot as plt
+import cv2
 
 class RoboGymEnv(gym.Env):
 
@@ -101,8 +102,7 @@ class RoboGymEnv(gym.Env):
         bottom_img = self.renderer.render()
 
         img = np.concatenate([front_img, bottom_img], dtype=np.uint8)
-
-        # img = np.asarray(img, dtype=np.uint8)
+        img = cv2.resize(img, (160, 120), interpolation=cv2.INTER_AREA)
 
         return img 
 
