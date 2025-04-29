@@ -23,12 +23,12 @@ if __name__ == '__main__':
     updates_per_step = 1
     gamma = 0.99
     tau = 0.005
-    alpha = 0.05 # Temperature parameter.
+    alpha = 0.1 # Temperature parameter.
     min_alpha = alpha
     policy = "Gaussian"
     target_update_interval = 4
     automatic_entropy_tuning = False
-    hidden_size = 64 
+    hidden_size = 256 
     learning_rate = 0.0001
     max_episode_steps=3000 # max episode steps
     alpha_decay = 0.0001

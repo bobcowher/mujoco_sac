@@ -30,13 +30,13 @@ class QNetwork(nn.Module):
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # Q1 architecture
-        self.linear1 = nn.Linear(305, hidden_dim * 2)
-        self.linear2 = nn.Linear(hidden_dim * 2, hidden_dim)
+        self.linear1 = nn.Linear(305, hidden_dim)
+        self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, 1)
 
         # Q2 architecture
-        self.linear4 = nn.Linear(305, hidden_dim * 2)
-        self.linear5 = nn.Linear(hidden_dim * 2, hidden_dim)
+        self.linear4 = nn.Linear(305, hidden_dim)
+        self.linear5 = nn.Linear(hidden_dim, hidden_dim)
         self.linear6 = nn.Linear(hidden_dim, 1)
 
         self.name = name
