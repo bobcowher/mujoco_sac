@@ -15,7 +15,7 @@ from torch.utils.tensorboard import SummaryWriter
 if __name__ == '__main__':
 
     env_name = "boston_dynamics_spot"
-    replay_buffer_size = 120000
+    replay_buffer_size = 500000
     episodes = 3000
     warmup = 20
     batch_size = 64
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     policy = "Gaussian"
     target_update_interval = 4
     automatic_entropy_tuning = False
-    hidden_size = 256 
+    hidden_size = 512 
     learning_rate = 0.0001
     max_episode_steps=3000 # max episode steps
     alpha_decay = 0.0001
@@ -71,7 +71,8 @@ if __name__ == '__main__':
                           joint_pos_dim=state['joint_pos'].shape[0],
                           joint_vel_dim=state['joint_vel'].shape[0],  
                           n_actions=env.action_space.shape[0],
-                          device=device)
+                          input_device='cpu',
+                          output_device=device)
 
     # Training Loop
     total_numsteps = 0
