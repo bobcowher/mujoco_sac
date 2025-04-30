@@ -25,17 +25,18 @@ class QNetwork(nn.Module):
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=8, kernel_size=4, stride=2)
         self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=4, stride=2)
         self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2)  # Third convolutional layer
+        self.conv4 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=2)
 
         # Pool Layer
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # Q1 architecture
-        self.linear1 = nn.Linear(305, hidden_dim)
+        self.linear1 = nn.Linear(177, hidden_dim)
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, 1)
 
         # Q2 architecture
-        self.linear4 = nn.Linear(305, hidden_dim)
+        self.linear4 = nn.Linear(177, hidden_dim)
         self.linear5 = nn.Linear(hidden_dim, hidden_dim)
         self.linear6 = nn.Linear(hidden_dim, 1)
 
@@ -63,8 +64,9 @@ class QNetwork(nn.Module):
         x = x / 255.0
 
         x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = F.relu(self.conv3(x)) 
+        x = F.relu(self.conv2(x))
+        x = self.pool(F.relu(self.conv3(x)))
+        x = F.relu(self.conv4(x)) 
 
         #print(f"X Shape before reshape: {x.shape}")
         x = x.reshape(x.size(0), -1)
@@ -102,12 +104,13 @@ class GaussianPolicy(nn.Module):
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=8, kernel_size=4, stride=2)
         self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=4, stride=2)
         self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2)
+        self.conv4 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=2)
 
         # Pooling layer.  
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
         
         # FC Layers
-        self.linear1 = nn.Linear(293, hidden_dim) # Make this dynamic
+        self.linear1 = nn.Linear(165, hidden_dim) # Make this dynamic
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, hidden_dim)
 
@@ -140,8 +143,9 @@ class GaussianPolicy(nn.Module):
         x = x / 255.0
 
         x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = F.relu(self.conv3(x)) 
+        x = F.relu(self.conv2(x))
+        x = self.pool(F.relu(self.conv3(x)))
+        x = F.relu(self.conv4(x))
         x = x.reshape(x.size(0), -1)
  
         x = torch.cat([x, joint_pos, joint_vel], dim=1)

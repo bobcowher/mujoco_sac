@@ -29,6 +29,8 @@ if __name__ == '__main__':
     learning_rate = 0.0001
     max_episode_steps=3000 # max episode steps
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
     env = RoboGymEnv(robot="boston_dynamics_spot", max_episode_steps=max_episode_steps)
 
 
@@ -36,7 +38,7 @@ if __name__ == '__main__':
     # Agent
     agent = SAC(env.observation_space.shape[0], env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
                 target_update_interval=target_update_interval, automatic_entropy_tuning=automatic_entropy_tuning,
-                hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=0.01)
+                hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=0.01, device=device)
 
     agent.load_checkpoint()
 

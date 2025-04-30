@@ -67,7 +67,7 @@ class SAC(object):
 
         while not done:
             
-            action = self.select_action(state)  # Sample action from policy
+            action = self.select_action(self.obs_to_tensor(obs=state))  # Sample action from policy
 
             next_state, reward, done, _, _ = env.step(action)  # Step
             episode_steps += 1

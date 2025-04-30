@@ -102,7 +102,9 @@ class RoboGymEnv(gym.Env):
         bottom_img = self.renderer.render()
 
         img = np.concatenate([front_img, bottom_img], dtype=np.uint8)
-        img = cv2.resize(img, (160, 120), interpolation=cv2.INTER_AREA)
+        #print(img.shape)
+        #sys.exit(1)
+        img = cv2.resize(img, (160, 240), interpolation=cv2.INTER_AREA)
 
         return img 
 
