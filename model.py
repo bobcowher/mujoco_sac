@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Normal
 import os
+import sys
 
 LOG_SIG_MAX = 2
 LOG_SIG_MIN = -20
@@ -14,29 +15,66 @@ def weights_init_(m):
         torch.nn.init.xavier_uniform_(m.weight, gain=1)
         torch.nn.init.constant_(m.bias, 0)
 
-class QNetwork(nn.Module):
-    def __init__(self, num_inputs, num_actions, hidden_dim, checkpoint_dir='checkpoints', name='q_network'):
+class BaseNetwork(nn.Module):
 
-        print(f"Num inputs: {num_inputs}")
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def calculate_conv_output(self, observation_shape):
+        # Create dummy batch of 1 image
+        dummy_input = torch.zeros(1, *observation_shape)
+
+        # Simulate full conv forward pass
+        x = dummy_input
+
+        # Permute if needed (e.g., from HWC to CHW)
+        if x.shape[1] != 3:
+            x = x.permute(0, 3, 1, 2)  # From NHWC to NCHW
+
+        x = x / 255.0  # Normalize like in forward()
+
+        # Conv pipeline with batchnorm if used
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = F.relu(self.conv4(x))
+
+        # Flatten and return size
+        return x.view(1, -1).size(1)
+
+
+
+class QNetwork(BaseNetwork):
+    def __init__(self, joint_obs_size, camera_obs_shape, num_actions, hidden_dim, checkpoint_dir='checkpoints', name='q_network'):
+
+        print(f"Joint OBS Size: {joint_obs_size}")
+        print(f"Camera OBS Size: {camera_obs_shape}")
         print(f"Num actions: {num_actions}")
 
         super(QNetwork, self).__init__()
 
+        # Convolutional Layers
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=8, kernel_size=4, stride=2)
         self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=4, stride=2)
         self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2)  # Third convolutional layer
         self.conv4 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=2)
 
+        # Batch Norm
+        self.bn1 = nn.BatchNorm2d(8)
+        self.bn2 = nn.BatchNorm2d(16)
+        self.bn3 = nn.BatchNorm2d(32)
+        self.bn4 = nn.BatchNorm2d(64)        
+
         # Pool Layer
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # Q1 architecture
-        self.linear1 = nn.Linear(177, hidden_dim)
+        self.linear1 = nn.Linear(self.calculate_conv_output(camera_obs_shape) + joint_obs_size + num_actions, hidden_dim)
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, 1)
 
         # Q2 architecture
-        self.linear4 = nn.Linear(177, hidden_dim)
+        self.linear4 = nn.Linear(self.calculate_conv_output(camera_obs_shape) + joint_obs_size + num_actions, hidden_dim)
         self.linear5 = nn.Linear(hidden_dim, hidden_dim)
         self.linear6 = nn.Linear(hidden_dim, 1)
 
@@ -46,13 +84,6 @@ class QNetwork(nn.Module):
 
         self.apply(weights_init_)
 
-    def calculate_conv_output(self, observation_shape):
-        x = torch.zeros(1, *observation_shape)
-        x = self.pool(F.relu(self.conv1(x))) 
-        x = self.pool(F.relu(self.conv2(x)))
-        x = F.relu(self.conv3(x))
-
-        return x.view(-1).shape[0]
 
     def forward(self, obs, action):
 
@@ -63,20 +94,24 @@ class QNetwork(nn.Module):
         x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
         x = x / 255.0
 
-        x = self.pool(F.relu(self.conv1(x)))
-        x = F.relu(self.conv2(x))
-        x = self.pool(F.relu(self.conv3(x)))
-        x = F.relu(self.conv4(x)) 
+        x = self.bn1(F.relu(self.conv1(x)))
+        x = self.bn2(F.relu(self.conv2(x)))
+        x = self.bn3(F.relu(self.conv3(x)))
+        x = self.bn4(F.relu(self.conv4(x)))
 
         #print(f"X Shape before reshape: {x.shape}")
         x = x.reshape(x.size(0), -1)
 
-        #print(f"X Shape: {x.shape}")
-        #print(f"joint_pos shape: {joint_pos.shape}")
-        #print(f"joint_vel shape: {joint_vel.shape}")
-        #print(f"Action Shape: {action.shape}")
+        # print(f"X Shape: {x.shape}")
+        # print(f"joint_pos shape: {joint_pos.shape}")
+        # print(f"joint_vel shape: {joint_vel.shape}")
+        # print(f"Action Shape: {action.shape}")
 
         x = torch.cat([x, joint_pos, joint_vel, action], dim=1)
+
+        # print(f"X After Concatenation: {x.shape}")
+        # sys.exit(1)
+        
 
         x1 = F.relu(self.linear1(x))
         x1 = F.relu(self.linear2(x1))
@@ -95,7 +130,7 @@ class QNetwork(nn.Module):
         self.load_state_dict(torch.load(self.checkpoint_file))
 
 
-class GaussianPolicy(nn.Module):
+class GaussianPolicy(BaseNetwork):
     def __init__(self, num_inputs, num_actions, hidden_dim, action_space=None, checkpoint_dir='checkpoints', name='policy_network'):
         
         super(GaussianPolicy, self).__init__()

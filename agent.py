@@ -8,7 +8,7 @@ import time
 
 
 class SAC(object):
-    def __init__(self, num_inputs, action_space, gamma, tau, alpha, policy, target_update_interval,
+    def __init__(self, joint_obs_size, action_space, gamma, tau, alpha, policy, target_update_interval,
                  automatic_entropy_tuning, hidden_size, learning_rate, alpha_decay, device, min_alpha=0.05):
 
         self.gamma = gamma
@@ -21,13 +21,20 @@ class SAC(object):
 
         self.device = device 
 
-        self.critic = QNetwork(num_inputs, action_space.shape[0], hidden_size).to(device=self.device)
+        self.critic = QNetwork(joint_obs_size=joint_obs_size, 
+                               camera_obs_shape=(3, 160, 240),
+                               num_actions=action_space.shape[0], 
+                               hidden_dim=hidden_size).to(device=self.device)
         self.critic_optim = AdamW(self.critic.parameters(), lr=0.001)
-
-        self.critic_target = QNetwork(num_inputs, action_space.shape[0], hidden_size).to(self.device)
+        
+        self.critic_target = QNetwork(joint_obs_size=joint_obs_size, 
+                               camera_obs_shape=(3, 160, 240),
+                               num_actions=action_space.shape[0], 
+                               hidden_dim=hidden_size).to(device=self.device)
+ 
         hard_update(self.critic_target, self.critic)
 
-        self.policy = GaussianPolicy(num_inputs, action_space.shape[0], hidden_size, action_space).to(self.device)
+        self.policy = GaussianPolicy(joint_obs_size, action_space.shape[0], hidden_size, action_space).to(self.device)
         self.policy_optim = Adam(self.policy.parameters(), lr=learning_rate)
 
         self.alpha_decay = alpha_decay

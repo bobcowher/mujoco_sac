@@ -39,6 +39,9 @@ if __name__ == '__main__':
 
     state, info = env.reset()
 
+    joint_obs_size = state['joint_pos'].shape[0] + state['joint_vel'].shape[0]
+
+    print(joint_obs_size)
 
     # print("Camera OBS Shape:", state['camera'].shape)
     # print(state['camera'])
@@ -48,10 +51,9 @@ if __name__ == '__main__':
 
     # print(f"State shape: {state.shape}")
 
-    print(env.observation_space.shape[0])
     
     # Agent
-    agent = SAC(env.observation_space.shape[0], env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
+    agent = SAC(joint_obs_size, env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
                 target_update_interval=target_update_interval, automatic_entropy_tuning=automatic_entropy_tuning,
                 hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=alpha_decay, min_alpha=min_alpha,
                 device=device)
