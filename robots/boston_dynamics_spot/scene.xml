@@ -39,8 +39,8 @@
       <geom type="box" size="0.2 0.2 0.05" rgba="0.8 0.8 0 1" />
     </body>
 
-    <body name="goal" pos="10.0 0.0 0.05">
-      <geom type="sphere" size="0.05" rgba="1 1 0 1" contype="0" conaffinity="0" />
+    <body name="goal" pos="10.0 0.0 0.50">
+      <geom type="sphere" size="0.50" rgba="0 1 0 1" contype="0" conaffinity="0" />
     </body>
 
     <camera name="side_view" pos="2 -2 1" euler="0.4 0 -0.8" />
