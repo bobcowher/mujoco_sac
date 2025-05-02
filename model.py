@@ -17,8 +17,8 @@ def weights_init_(m):
 
 class BaseNetwork(nn.Module):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, camera_obs_shape):
+        super(BaseNetwork, self).__init__()
         
         # Batch Norm
         self.bn1 = nn.BatchNorm2d(16)
@@ -31,6 +31,13 @@ class BaseNetwork(nn.Module):
         self.conv2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2, padding=1)
         self.conv3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=2, padding=1)  # Third convolutional layer
         self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1)
+
+        image_obs_size = self.calculate_conv_output(camera_obs_shape)
+
+        self.conv_compression_layer = nn.Linear(image_obs_size, 512)
+        
+        print(f"Creating network with...")
+        print(f"Flattened image obs size {image_obs_size}")
 
     def calculate_conv_output(self, observation_shape):
         # Create dummy batch of 1 image
@@ -63,19 +70,19 @@ class QNetwork(BaseNetwork):
         print(f"Camera OBS Size: {camera_obs_shape}")
         print(f"Num actions: {num_actions}")
 
-        super(QNetwork, self).__init__()
+        super(QNetwork, self).__init__(camera_obs_shape=camera_obs_shape)
 
 
         # Pool Layer
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # Q1 architecture
-        self.linear1 = nn.Linear(self.calculate_conv_output(camera_obs_shape) + joint_obs_size + num_actions, hidden_dim)
+        self.linear1 = nn.Linear(512 + joint_obs_size + num_actions, hidden_dim)
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, 1)
 
         # Q2 architecture
-        self.linear4 = nn.Linear(self.calculate_conv_output(camera_obs_shape) + joint_obs_size + num_actions, hidden_dim)
+        self.linear4 = nn.Linear(512 + joint_obs_size + num_actions, hidden_dim)
         self.linear5 = nn.Linear(hidden_dim, hidden_dim)
         self.linear6 = nn.Linear(hidden_dim, 1)
 
@@ -102,6 +109,7 @@ class QNetwork(BaseNetwork):
 
         #print(f"X Shape before reshape: {x.shape}")
         x = x.reshape(x.size(0), -1)
+        x = self.conv_compression_layer(x)
 
         # print(f"X Shape: {x.shape}")
         # print(f"joint_pos shape: {joint_pos.shape}")
@@ -134,18 +142,13 @@ class QNetwork(BaseNetwork):
 class GaussianPolicy(BaseNetwork):
     def __init__(self, joint_obs_size, camera_obs_shape, num_actions, hidden_dim, action_space=None, checkpoint_dir='checkpoints', name='policy_network'):
         
-        super(GaussianPolicy, self).__init__()
+        super(GaussianPolicy, self).__init__(camera_obs_shape=camera_obs_shape)
  
         # Pooling layer.  
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
-        image_obs_size = self.calculate_conv_output(camera_obs_shape)
-
-        print(f"Creating network with...")
-        print(f"Flattened image obs size {image_obs_size}")
-
         # FC Layers
-        self.linear1 = nn.Linear(image_obs_size + joint_obs_size, hidden_dim) # Make this dynamic
+        self.linear1 = nn.Linear(512 + joint_obs_size, hidden_dim) # Make this dynamic
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, hidden_dim)
 
@@ -182,6 +185,7 @@ class GaussianPolicy(BaseNetwork):
         x = self.bn3(F.relu(self.conv3(x)))
         x = self.bn4(F.relu(self.conv4(x)))
         x = x.reshape(x.size(0), -1)
+        x = self.conv_compression_layer(x)
  
         x = torch.cat([x, joint_pos, joint_vel], dim=1)
 
