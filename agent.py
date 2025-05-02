@@ -9,11 +9,12 @@ import time
 
 class SAC(object):
     def __init__(self, joint_obs_size, action_space, gamma, tau, alpha, policy, target_update_interval,
-                 automatic_entropy_tuning, hidden_size, learning_rate, alpha_decay, device, min_alpha=0.05):
+                 automatic_entropy_tuning, hidden_size, learning_rate, alpha_decay, device, env, min_alpha=0.05):
 
         self.gamma = gamma
         self.tau = tau
         self.alpha = alpha
+        self.env = env
 
         self.policy_type = policy
         self.target_update_interval = target_update_interval
@@ -50,14 +51,19 @@ class SAC(object):
         #     self.policy = DeterministicPolicy(num_inputs, action_space.shape[0], hidden_size, action_space).to(self.device)
         #     self.policy_optim = Adam(self.policy.parameters(), lr=learning_rate)
 
-    def select_action(self, state, evaluate=False):
+    def select_action(self, state, evaluate=False, random=False):
         # state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
         # state = state.to(self.device).unsqueeze(0)
-        if evaluate is False:
-            action, _, _ = self.policy.sample(state)
+
+        if random:
+            action = self.env.action_space.sample()
+            return action
         else:
-            _, _, action = self.policy.sample(state)
-        return action.detach().cpu().numpy()[0]
+            if evaluate is False:
+                action, _, _ = self.policy.sample(state)
+            else:
+                _, _, action = self.policy.sample(state)
+            return action.detach().cpu().numpy()[0]
 
 
     def obs_to_tensor(self, obs):
@@ -68,23 +74,23 @@ class SAC(object):
         }
 
 
-    def test(self, env):
+    def test(self):
     
         episode_reward = 0
         episode_steps = 0
         done = False
-        state, info = env.reset()
+        state, info = self.env.reset()
 
         while not done:
             
             action = self.select_action(self.obs_to_tensor(obs=state))  # Sample action from policy
 
-            next_state, reward, done, _, _ = env.step(action)  # Step
+            next_state, reward, done, _, _ = self.env.step(action)  # Step
             episode_steps += 1
             episode_reward += reward
 
-            env.render()
-            env.render(front_camera=True)
+            self.env.render()
+            self.env.render(front_camera=True)
 
             # img = self.sim.render(width=128, height=128, camera_name="front_camera")
             #img = env._get_image_obs()
@@ -99,22 +105,26 @@ class SAC(object):
 
         print(f"Test run completed with score {episode_reward}")
 
-    def train(self, episodes, env, memory, updates_per_step, batch_size, summary_writer, max_episode_steps):
+    def train(self, episodes, memory, updates_per_step, batch_size, summary_writer, max_episode_steps, warmup):
         # Training Loop
         total_numsteps = 0
         updates = 0
+        warmup_episode = True
 
         for i_episode in range(episodes):
             episode_reward = 0
             episode_steps = 0
             done = False
-            state, info = env.reset()
+            state, info = self.env.reset()
+
+            if i_episode > warmup:
+                warmup_episode = False
 
             while not done:
-                
-                action = self.select_action(self.obs_to_tensor(obs=state))  # Sample action from policy
 
-                if memory.can_sample(batch_size=batch_size) and total_numsteps % 10 == 0:
+                action = self.select_action(self.obs_to_tensor(obs=state), random=warmup_episode)  # Sample action from policy
+
+                if memory.can_sample(batch_size=batch_size) and not warmup_episode:
                     # Number of updates per step in environment
                     for i in range(updates_per_step):
                         # Update parameters of all the networks
@@ -126,7 +136,7 @@ class SAC(object):
                         summary_writer.add_scalar('entropy_temprature/alpha', alpha, updates)
                         updates += 1
 
-                next_state, reward, done, _, _ = env.step(action)  # Step
+                next_state, reward, done, _, _ = self.env.step(action)  # Step
                 episode_steps += 1
                 total_numsteps += 1
                 episode_reward += reward

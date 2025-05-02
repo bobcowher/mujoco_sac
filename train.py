@@ -17,7 +17,7 @@ if __name__ == '__main__':
     env_name = "boston_dynamics_spot"
     replay_buffer_size = 100000
     episodes = 3000
-    warmup = 20
+    warmup = 10
     batch_size = 64
     pretrain_batch_size = 64
     updates_per_step = 1
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     agent = SAC(joint_obs_size, env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
                 target_update_interval=target_update_interval, automatic_entropy_tuning=automatic_entropy_tuning,
                 hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=alpha_decay, min_alpha=min_alpha,
-                device=device)
+                device=device, env=env)
 
     # agent.load_checkpoint()
 
@@ -86,7 +86,7 @@ if __name__ == '__main__':
                 batch_size=batch_size, 
                 summary_writer=summary_writer, 
                 max_episode_steps=max_episode_steps,
-                env=env)
+                warmup=warmup)
 
 
 
