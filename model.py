@@ -19,6 +19,18 @@ class BaseNetwork(nn.Module):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Batch Norm
+        self.bn1 = nn.BatchNorm2d(16)
+        self.bn2 = nn.BatchNorm2d(32)
+        self.bn3 = nn.BatchNorm2d(64)
+        self.bn4 = nn.BatchNorm2d(64)        
+        
+        # Convolutional Layers
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=16, kernel_size=5, stride=2, padding=1)
+        self.conv2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2, padding=1)
+        self.conv3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=2, padding=1)  # Third convolutional layer
+        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1)
 
     def calculate_conv_output(self, observation_shape):
         # Create dummy batch of 1 image
@@ -53,17 +65,6 @@ class QNetwork(BaseNetwork):
 
         super(QNetwork, self).__init__()
 
-        # Convolutional Layers
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=8, kernel_size=4, stride=2)
-        self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=4, stride=2)
-        self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2)  # Third convolutional layer
-        self.conv4 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=2)
-
-        # Batch Norm
-        self.bn1 = nn.BatchNorm2d(8)
-        self.bn2 = nn.BatchNorm2d(16)
-        self.bn3 = nn.BatchNorm2d(32)
-        self.bn4 = nn.BatchNorm2d(64)        
 
         # Pool Layer
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -131,21 +132,20 @@ class QNetwork(BaseNetwork):
 
 
 class GaussianPolicy(BaseNetwork):
-    def __init__(self, num_inputs, num_actions, hidden_dim, action_space=None, checkpoint_dir='checkpoints', name='policy_network'):
+    def __init__(self, joint_obs_size, camera_obs_shape, num_actions, hidden_dim, action_space=None, checkpoint_dir='checkpoints', name='policy_network'):
         
         super(GaussianPolicy, self).__init__()
  
-        # Convolutional layers
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=8, kernel_size=4, stride=2)
-        self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=4, stride=2)
-        self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2)
-        self.conv4 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=2)
-
         # Pooling layer.  
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-        
+
+        image_obs_size = self.calculate_conv_output(camera_obs_shape)
+
+        print(f"Creating network with...")
+        print(f"Flattened image obs size {image_obs_size}")
+
         # FC Layers
-        self.linear1 = nn.Linear(165, hidden_dim) # Make this dynamic
+        self.linear1 = nn.Linear(image_obs_size + joint_obs_size, hidden_dim) # Make this dynamic
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, hidden_dim)
 
@@ -177,10 +177,10 @@ class GaussianPolicy(BaseNetwork):
         x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
         x = x / 255.0
 
-        x = self.pool(F.relu(self.conv1(x)))
-        x = F.relu(self.conv2(x))
-        x = self.pool(F.relu(self.conv3(x)))
-        x = F.relu(self.conv4(x))
+        x = self.bn1(F.relu(self.conv1(x)))
+        x = self.bn2(F.relu(self.conv2(x)))
+        x = self.bn3(F.relu(self.conv3(x)))
+        x = self.bn4(F.relu(self.conv4(x)))
         x = x.reshape(x.size(0), -1)
  
         x = torch.cat([x, joint_pos, joint_vel], dim=1)
