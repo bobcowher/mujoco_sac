@@ -19,18 +19,19 @@ class BaseNetwork(nn.Module):
 
     def __init__(self, camera_obs_shape):
         super(BaseNetwork, self).__init__()
-        
+       
         # Batch Norm
-        self.bn1 = nn.BatchNorm2d(16)
-        self.bn2 = nn.BatchNorm2d(32)
-        self.bn3 = nn.BatchNorm2d(64)
+        self.bn1 = nn.BatchNorm2d(8)
+        self.bn2 = nn.BatchNorm2d(16)
+        self.bn3 = nn.BatchNorm2d(32)
         self.bn4 = nn.BatchNorm2d(64)        
         
         # Convolutional Layers
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=16, kernel_size=5, stride=2, padding=1)
-        self.conv2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2, padding=1)
-        self.conv3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=2, padding=1)  # Third convolutional layer
-        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1)
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=8, kernel_size=3, stride=2, padding=1)
+        self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3, stride=2, padding=1)
+        self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2, padding=1)  # Third convolutional layer
+        self.conv4 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=2, padding=1)
+        self.conv5 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1)
 
         image_obs_size = self.calculate_conv_output(camera_obs_shape)
 
@@ -57,6 +58,7 @@ class BaseNetwork(nn.Module):
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
         x = F.relu(self.conv4(x))
+        x = F.relu(self.conv5(x))
 
         # Flatten and return size
         return x.view(1, -1).size(1)
@@ -102,10 +104,11 @@ class QNetwork(BaseNetwork):
         x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
         x = x / 255.0
 
-        x = self.bn1(F.relu(self.conv1(x)))
-        x = self.bn2(F.relu(self.conv2(x)))
-        x = self.bn3(F.relu(self.conv3(x)))
-        x = self.bn4(F.relu(self.conv4(x)))
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = F.relu(self.conv4(x))
+        x = F.relu(self.conv5(x))
 
         #print(f"X Shape before reshape: {x.shape}")
         x = x.reshape(x.size(0), -1)
@@ -180,10 +183,12 @@ class GaussianPolicy(BaseNetwork):
         x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
         x = x / 255.0
 
-        x = self.bn1(F.relu(self.conv1(x)))
-        x = self.bn2(F.relu(self.conv2(x)))
-        x = self.bn3(F.relu(self.conv3(x)))
-        x = self.bn4(F.relu(self.conv4(x)))
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = F.relu(self.conv4(x))
+        x = F.relu(self.conv5(x))
+
         x = x.reshape(x.size(0), -1)
         x = self.conv_compression_layer(x)
  
