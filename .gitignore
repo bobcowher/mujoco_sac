@@ -3,3 +3,4 @@ runs
 models
 checkpoints
 logs
+nohup.out
