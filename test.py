@@ -41,10 +41,10 @@ if __name__ == '__main__':
     # Agent
     agent = SAC(joint_obs_size=joint_obs_size, action_space=env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
                 target_update_interval=target_update_interval, automatic_entropy_tuning=automatic_entropy_tuning,
-                hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=0.01, device=device)
+                hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=0.01, device=device, env=env)
 
     agent.load_checkpoint()
 
-    agent.test(env=env)
+    agent.test()
 
     env.close()

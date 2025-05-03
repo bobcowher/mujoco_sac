@@ -83,7 +83,7 @@ class SAC(object):
 
         while not done:
             
-            action = self.select_action(self.obs_to_tensor(obs=state))  # Sample action from policy
+            action = self.select_action(self.obs_to_tensor(obs=state), random=True)  # Sample action from policy
 
             next_state, reward, done, _, _ = self.env.step(action)  # Step
             episode_steps += 1
@@ -96,7 +96,7 @@ class SAC(object):
             #img = env._get_image_obs()
 
 
-            time.sleep(0.01)
+            time.sleep(0.005)
 
             # Ignore the "done" signal if it comes from hitting the time horizon.
             # (https://github.com/openai/spinningup/blob/master/spinup/algos/sac/sac.py)
