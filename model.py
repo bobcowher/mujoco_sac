@@ -37,8 +37,11 @@ class BaseNetwork(nn.Module):
 
         self.conv_compression_layer = nn.Linear(image_obs_size, 512)
         
+        print("")
+        print("---------------------------")
         print(f"Creating network with...")
         print(f"Flattened image obs size {image_obs_size}")
+        print("")
 
     def calculate_conv_output(self, observation_shape):
         # Create dummy batch of 1 image
