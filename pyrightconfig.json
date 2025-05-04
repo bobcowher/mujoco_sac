@@ -1,0 +1,6 @@
+{
+  "venvPath": "/home/robertcowher/anaconda3/envs",
+  "venv": "mujoco_sac",
+  "typeCheckingMode": "basic",
+  "pythonVersion": "3.11"
+}
