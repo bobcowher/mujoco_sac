@@ -60,9 +60,9 @@ class SAC(object):
             return action
         else:
             if evaluate is False:
-                action, _, _ = self.policy.sample(state)
+                action, _, _, _ = self.policy.sample(state)
             else:
-                _, _, action = self.policy.sample(state)
+                _, _, action, _ = self.policy.sample(state)
             return action.detach().cpu().numpy()[0]
 
 
@@ -136,6 +136,9 @@ class SAC(object):
                         summary_writer.add_scalar('entropy_temprature/alpha', alpha, updates)
                         updates += 1
 
+                if i_episode % 20 == 0 and episode_steps < 5:
+                    print(f"Sampled action: {action}")
+
                 next_state, reward, done, _, _ = self.env.step(action)  # Step
                 episode_steps += 1
                 total_numsteps += 1
@@ -167,7 +170,7 @@ class SAC(object):
         mask_batch = mask_batch.unsqueeze(1)
 
         with torch.no_grad():
-            next_state_action, next_state_log_pi, _ = self.policy.sample(next_state_batch)
+            next_state_action, next_state_log_pi, _, _ = self.policy.sample(next_state_batch)
             qf1_next_target, qf2_next_target = self.critic_target(next_state_batch, next_state_action)
             min_qf_next_target = torch.min(qf1_next_target, qf2_next_target) - self.alpha * next_state_log_pi
             next_q_value = reward_batch + mask_batch * self.gamma * (min_qf_next_target)
@@ -183,10 +186,13 @@ class SAC(object):
         qf_loss.backward()
         self.critic_optim.step()
 
-        pi, log_pi, _ = self.policy.sample(state_batch)
+        pi, log_pi, _, log_std = self.policy.sample(state_batch)
 
         qf1_pi, qf2_pi = self.critic(state_batch, pi)
         min_qf_pi = torch.min(qf1_pi, qf2_pi)
+
+        print(f"Mean log_std: {log_std.mean().item():.3f}")
+        print(f"Action sample (mean/std): {pi.mean().item():.3f} / {pi.std().item():.3f}")
 
         if human == True:
             policy_loss = F.mse_loss(pi, action_batch)
@@ -211,13 +217,6 @@ class SAC(object):
         return qf1_loss.item(), qf2_loss.item(), policy_loss.item(), self.alpha 
 
 
-    def save_models(self):
-        self.actor.save_checkpoint()
-        self.target_actor.save_checkpoint()
-        self.critic_1.save_checkpoint()
-        self.critic_2.save_checkpoint()
-        self.target_critic_1.save_checkpoint()
-        self.target_critic_2.save_checkpoint()
     # Save model parameters
     def save_checkpoint(self, suffix=""):
         if not os.path.exists('checkpoints/'):
