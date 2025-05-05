@@ -8,8 +8,9 @@ import cv2
 
 class RoboGymEnv(gym.Env):
 
-    def __init__(self, robot, max_episode_steps):
+    def __init__(self, robot, max_episode_steps, step_repeat=2):
         model_path = f"robots/{robot}/scene.xml"
+        self.step_repeat = step_repeat
         self.model = mujoco.MjModel.from_xml_path(model_path)
         self.data = mujoco.MjData(self.model)
         self.success_threshold = 1
@@ -22,13 +23,6 @@ class RoboGymEnv(gym.Env):
 #        self.goal_pos = self.data.xpos[self.goal_id]
 
         # print(f"self.goal_pos: {self.goal_pos}")
-
-        # print(self.goal_pos) 
-
-        # Viewer setup (non-blocking)
-        self.viewer = None
-
-        # Setup action and observation spaces (example: torque control)
         self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(self.model.nu,), dtype=np.float32)
         obs_dim = obs['camera'].shape[0]  # Position + velocity + target position
         # print(f"Obs dim: {obs_dim}"
@@ -61,26 +55,38 @@ class RoboGymEnv(gym.Env):
         return self._get_obs(), {}
 
     def step(self, action):
+
+        total_reward = 0
+        
+        for i in range(self.step_repeat):
+            reward, done, truncated, info = self._step(action)
+            total_reward += reward
+            
+            if done:
+                break
+
+        obs = self._get_obs()
+
+        return obs, reward, done, truncated, info
+
+    def _step(self, action):
         # Apply control input
         self.data.ctrl[:] = action
 
         # Step the simulation
         mujoco.mj_step(self.model, self.data)
 
-        # Collect observation and compute reward
-        obs = self._get_obs()
-        # reward = self._compute_reward(obs, action)
         current_goal_distance = self.get_distance_to_goal()
         reward = self.last_distance - current_goal_distance
         self.last_distance = current_goal_distance
 
         done = False
 
+        reward = reward * 1000    
+        
         if(current_goal_distance <= self.success_threshold):
             reward += 1
             done = True
-
-        reward = reward * 100    
 
         truncated = False    # Set to True if time limit or failure
         info = {}
@@ -90,7 +96,7 @@ class RoboGymEnv(gym.Env):
             if self.current_step >= self.max_episode_steps:
                 done = True
 
-        return obs, reward, done, truncated, info
+        return reward, done, truncated, info
 
 
     def _get_image_obs(self):

@@ -84,7 +84,7 @@ class SAC(object):
         while not done:
             
             action = self.select_action(self.obs_to_tensor(obs=state))  # Sample action from policy
-
+            #print(f"Action: {action}")
             next_state, reward, done, _, _ = self.env.step(action)  # Step
             episode_steps += 1
             episode_reward += reward
@@ -136,10 +136,12 @@ class SAC(object):
                         summary_writer.add_scalar('entropy_temprature/alpha', alpha, updates)
                         updates += 1
 
-                if i_episode % 20 == 0 and episode_steps < 5:
-                    print(f"Sampled action: {action}")
-
+                #if i_episode % 20 == 0 and episode_steps < 5:
+                #    print(f"Sampled action: {action}")
+                
                 next_state, reward, done, _, _ = self.env.step(action)  # Step
+                #print(f"Action: {action}")
+                #print(f"Reward: {reward} - Joint Pos: {state['joint_pos']}")
                 episode_steps += 1
                 total_numsteps += 1
                 episode_reward += reward
@@ -162,8 +164,7 @@ class SAC(object):
     def update_parameters(self, memory, batch_size, updates, human=False):
         # Sample a batch from memory
         state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample_buffer(batch_size=batch_size)
-
-        # state_batch = state_batch.to(self.device)
+                # state_batch = state_batch.to(self.device)
         # next_state_batch = next_state_batch.to(self.device)
         # action_batch = action_batch.to(self.device)
         reward_batch = reward_batch.unsqueeze(1)
@@ -191,8 +192,8 @@ class SAC(object):
         qf1_pi, qf2_pi = self.critic(state_batch, pi)
         min_qf_pi = torch.min(qf1_pi, qf2_pi)
 
-        print(f"Mean log_std: {log_std.mean().item():.3f}")
-        print(f"Action sample (mean/std): {pi.mean().item():.3f} / {pi.std().item():.3f}")
+        #print(f"Mean log_std: {log_std.mean().item():.3f}")
+        #print(f"Action sample (mean/std): {pi.mean().item():.3f} / {pi.std().item():.3f}")
 
         if human == True:
             policy_loss = F.mse_loss(pi, action_batch)

@@ -29,13 +29,13 @@ if __name__ == '__main__':
     target_update_interval = 4
     automatic_entropy_tuning = False
     hidden_size = 512 
-    learning_rate = 0.0003
+    learning_rate = 0.0001
     max_episode_steps=2000 # max episode steps
     alpha_decay = 0.0001
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    env = RoboGymEnv(robot=env_name, max_episode_steps=max_episode_steps)
+    env = RoboGymEnv(robot=env_name, max_episode_steps=max_episode_steps, step_repeat=4)
 
     state, info = env.reset()
 
