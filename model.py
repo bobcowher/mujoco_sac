@@ -123,7 +123,7 @@ class QNetwork(BaseNetwork):
         xj = self.joint_compression_layer(torch.cat([joint_vel, joint_vel], dim=1))
         xa = self.action_compression_layer(action)
 
-        x = torch.cat([x , xj, x], dim=1)
+        x = torch.cat([x , xj, xa], dim=1)
 
         x1 = F.relu(self.linear1(x))
         x1 = F.relu(self.linear2(x1))
