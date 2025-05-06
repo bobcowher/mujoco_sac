@@ -17,7 +17,7 @@ def weights_init_(m):
 
 class BaseNetwork(nn.Module):
 
-    def __init__(self, camera_obs_shape):
+    def __init__(self, camera_obs_shape, joint_obs_size, num_actions):
         super(BaseNetwork, self).__init__()
        
         # Batch Norm
@@ -36,6 +36,8 @@ class BaseNetwork(nn.Module):
         image_obs_size = self.calculate_conv_output(camera_obs_shape)
 
         self.conv_compression_layer = nn.Linear(image_obs_size, 512)
+        self.joint_compression_layer = nn.Linear(joint_obs_size, 256)
+        self.action_compression_layer = nn.LayerNorm(num_actions, 256)
         
         print("")
         print("---------------------------")
@@ -75,19 +77,21 @@ class QNetwork(BaseNetwork):
         print(f"Camera OBS Size: {camera_obs_shape}")
         print(f"Num actions: {num_actions}")
 
-        super(QNetwork, self).__init__(camera_obs_shape=camera_obs_shape)
+        super(QNetwork, self).__init__(camera_obs_shape=camera_obs_shape,
+                                       joint_obs_size=joint_obs_size,
+                                       num_actions=num_actions)
 
 
         # Pool Layer
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # Q1 architecture
-        self.linear1 = nn.Linear(512 + joint_obs_size + num_actions, hidden_dim)
+        self.linear1 = nn.Linear(1024, hidden_dim)
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, 1)
 
         # Q2 architecture
-        self.linear4 = nn.Linear(512 + joint_obs_size + num_actions, hidden_dim)
+        self.linear4 = nn.Linear(1024, hidden_dim)
         self.linear5 = nn.Linear(hidden_dim, hidden_dim)
         self.linear6 = nn.Linear(hidden_dim, 1)
 
@@ -115,18 +119,11 @@ class QNetwork(BaseNetwork):
 
         #print(f"X Shape before reshape: {x.shape}")
         x = x.reshape(x.size(0), -1)
-        x = self.conv_compression_layer(x)
+        xi = self.conv_compression_layer(x)
+        xj = self.joint_compression_layer(torch.cat([joint_vel, joint_vel], dim=1))
+        xa = self.action_compression_layer(action)
 
-        # print(f"X Shape: {x.shape}")
-        # print(f"joint_pos shape: {joint_pos.shape}")
-        # print(f"joint_vel shape: {joint_vel.shape}")
-        # print(f"Action Shape: {action.shape}")
-
-        x = torch.cat([x, joint_pos, joint_vel, action], dim=1)
-
-        # print(f"X After Concatenation: {x.shape}")
-        # sys.exit(1)
-        
+        x = torch.cat([x , xj, x], dim=1)
 
         x1 = F.relu(self.linear1(x))
         x1 = F.relu(self.linear2(x1))
@@ -148,13 +145,15 @@ class QNetwork(BaseNetwork):
 class GaussianPolicy(BaseNetwork):
     def __init__(self, joint_obs_size, camera_obs_shape, num_actions, hidden_dim, action_space=None, checkpoint_dir='checkpoints', name='policy_network'):
         
-        super(GaussianPolicy, self).__init__(camera_obs_shape=camera_obs_shape)
+        super(GaussianPolicy, self).__init__(camera_obs_shape=camera_obs_shape,
+                                             joint_obs_size=joint_obs_size,
+                                             num_actions=0)
  
         # Pooling layer.  
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # FC Layers
-        self.linear1 = nn.Linear(512 + joint_obs_size, hidden_dim) # Make this dynamic
+        self.linear1 = nn.Linear(756, hidden_dim) # Make this dynamic
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, hidden_dim)
 
@@ -194,8 +193,9 @@ class GaussianPolicy(BaseNetwork):
 
         x = x.reshape(x.size(0), -1)
         x = self.conv_compression_layer(x)
+        xj = self.joint_compression_layer(torch.cat([joint_pos, joint_vel], dim=1))
  
-        x = torch.cat([x, joint_pos, joint_vel], dim=1)
+        x = torch.cat([x, xj], dim=1)
 
         x = F.relu(self.linear1(x))
         x = F.relu(self.linear2(x))

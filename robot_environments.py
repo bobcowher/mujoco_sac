@@ -10,6 +10,8 @@ class RoboGymEnv(gym.Env):
 
     def __init__(self, robot, max_episode_steps, step_repeat=2):
         model_path = f"robots/{robot}/scene.xml"
+        
+        self.viewer = None
         self.step_repeat = step_repeat
         self.model = mujoco.MjModel.from_xml_path(model_path)
         self.data = mujoco.MjData(self.model)
