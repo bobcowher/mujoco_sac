@@ -37,7 +37,7 @@ class BaseNetwork(nn.Module):
 
         self.conv_compression_layer = nn.Linear(image_obs_size, 512)
         self.joint_compression_layer = nn.Linear(joint_obs_size, 256)
-        self.action_compression_layer = nn.LayerNorm(num_actions, 256)
+        self.action_compression_layer = nn.Linear(num_actions, 256)
         
         print("")
         print("---------------------------")
@@ -119,8 +119,8 @@ class QNetwork(BaseNetwork):
 
         #print(f"X Shape before reshape: {x.shape}")
         x = x.reshape(x.size(0), -1)
-        xi = self.conv_compression_layer(x)
-        xj = self.joint_compression_layer(torch.cat([joint_vel, joint_vel], dim=1))
+        x = self.conv_compression_layer(x)
+        xj = self.joint_compression_layer(torch.cat([joint_pos, joint_vel], dim=1))
         xa = self.action_compression_layer(action)
 
         x = torch.cat([x , xj, xa], dim=1)
@@ -153,7 +153,7 @@ class GaussianPolicy(BaseNetwork):
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # FC Layers
-        self.linear1 = nn.Linear(756, hidden_dim) # Make this dynamic
+        self.linear1 = nn.Linear(768, hidden_dim) # Make this dynamic
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, hidden_dim)
 
