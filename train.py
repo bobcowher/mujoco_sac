@@ -20,10 +20,10 @@ if __name__ == '__main__':
     warmup = 10
     batch_size = 64
     pretrain_batch_size = 64
-    updates_per_step = 1
+    updates_per_step = 1 
     gamma = 0.99
     tau = 0.005
-    alpha = 0.05 # Temperature parameter.
+    alpha = 0.1 # Temperature parameter.
     min_alpha = alpha
     policy = "Gaussian"
     target_update_interval = 4
