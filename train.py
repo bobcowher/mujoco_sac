@@ -58,7 +58,7 @@ if __name__ == '__main__':
                 hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=alpha_decay, min_alpha=min_alpha,
                 device=device, env=env)
 
-    # agent.load_checkpoint()
+    agent.load_checkpoint()
 
     # Tesnorboard
     episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size}"
