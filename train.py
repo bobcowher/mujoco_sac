@@ -20,7 +20,7 @@ if __name__ == '__main__':
     warmup = 10
     batch_size = 64
     pretrain_batch_size = 64
-    updates_per_step = 1 
+    updates_per_step = 4 
     gamma = 0.99
     tau = 0.005
     alpha = 0.1 # Temperature parameter.
