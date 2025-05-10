@@ -26,7 +26,7 @@ class SAC(object):
                                camera_obs_shape=(3, 160, 240),
                                num_actions=action_space.shape[0], 
                                hidden_dim=hidden_size).to(device=self.device)
-        self.critic_optim = AdamW(self.critic.parameters(), lr=learning_rate * 0.5)
+        self.critic_optim = AdamW(self.critic.parameters(), lr=learning_rate)
         
         self.critic_target = QNetwork(joint_obs_size=joint_obs_size, 
                                camera_obs_shape=(3, 160, 240),

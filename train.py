@@ -20,22 +20,23 @@ if __name__ == '__main__':
     warmup = 10
     batch_size = 64
     pretrain_batch_size = 64
-    updates_per_step = 4 
+    updates_per_step = 1 
     gamma = 0.99
     tau = 0.005
     alpha = 0.1 # Temperature parameter.
     min_alpha = alpha
     policy = "Gaussian"
-    target_update_interval = 4
+    target_update_interval = 1
     automatic_entropy_tuning = False
     hidden_size = 512 
     learning_rate = 0.0001
     max_episode_steps=2000 # max episode steps
     alpha_decay = 0.0001
+    step_repeat = 4 
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    env = RoboGymEnv(robot=env_name, max_episode_steps=max_episode_steps, step_repeat=4)
+    env = RoboGymEnv(robot=env_name, max_episode_steps=max_episode_steps, step_repeat=step_repeat)
 
     state, info = env.reset()
 
@@ -58,12 +59,10 @@ if __name__ == '__main__':
                 hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=alpha_decay, min_alpha=min_alpha,
                 device=device, env=env)
 
-    agent.load_checkpoint()
-
     # Tesnorboard
-    episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size}"
+    episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size} A: {alpha} UPS: {updates_per_step} TUI: {target_update_interval} SR: {step_repeat}"
 
-    summary_writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}_temp={alpha}_ad={alpha_decay}_ma={min_alpha}')
+    summary_writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}')
 
 
 

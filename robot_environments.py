@@ -69,7 +69,7 @@ class RoboGymEnv(gym.Env):
 
         obs = self._get_obs()
 
-        return obs, reward, done, truncated, info
+        return obs, total_reward, done, truncated, info
 
     def _step(self, action):
         # Apply control input

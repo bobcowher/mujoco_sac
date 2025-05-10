@@ -111,10 +111,10 @@ class QNetwork(BaseNetwork):
         x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
         x = x / 255.0
 
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.conv2(x))
-        x = F.relu(self.conv3(x))
-        x = F.relu(self.conv4(x))
+        x = self.bn1(F.relu(self.conv1(x)))
+        x = self.bn2(F.relu(self.conv2(x)))
+        x = self.bn3(F.relu(self.conv3(x)))
+        x = self.bn4(F.relu(self.conv4(x)))
         x = F.relu(self.conv5(x))
 
         #print(f"X Shape before reshape: {x.shape}")
@@ -185,10 +185,10 @@ class GaussianPolicy(BaseNetwork):
         x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
         x = x / 255.0
 
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.conv2(x))
-        x = F.relu(self.conv3(x))
-        x = F.relu(self.conv4(x))
+        x = self.bn1(F.relu(self.conv1(x)))
+        x = self.bn2(F.relu(self.conv2(x)))
+        x = self.bn3(F.relu(self.conv3(x)))
+        x = self.bn4(F.relu(self.conv4(x)))
         x = F.relu(self.conv5(x))
 
         x = x.reshape(x.size(0), -1)
