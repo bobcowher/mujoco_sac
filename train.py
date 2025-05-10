@@ -32,7 +32,7 @@ if __name__ == '__main__':
     learning_rate = 0.0001
     max_episode_steps=2000 # max episode steps
     alpha_decay = 0.0001
-    step_repeat = 4 
+    step_repeat = 1 
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
                 device=device, env=env)
 
     # Tesnorboard
-    episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size} A: {alpha} UPS: {updates_per_step} TUI: {target_update_interval} SR: {step_repeat}"
+    episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size} A: {alpha} UPS: {updates_per_step} TUI: {target_update_interval} SR: {step_repeat} - clipped-rewards"
 
     summary_writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}')
 

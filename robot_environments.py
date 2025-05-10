@@ -85,9 +85,10 @@ class RoboGymEnv(gym.Env):
         done = False
 
         reward = reward * 1000    
+        reward = np.clip(reward, -0.05, 0.05)
         
         if(current_goal_distance <= self.success_threshold):
-            reward += 1
+            reward += 100
             done = True
 
         truncated = False    # Set to True if time limit or failure
