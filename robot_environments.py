@@ -5,6 +5,7 @@ import numpy as np
 import sys
 import matplotlib.pyplot as plt
 import cv2
+import time
 
 class RoboGymEnv(gym.Env):
 
@@ -37,8 +38,16 @@ class RoboGymEnv(gym.Env):
         return self.data.xpos[self.model.body(name).id]
     
     def get_distance_to_goal(self):
-        robot_pos = self.data.qpos[:3]
+        #robot_pos = self.data.qpos[:3]
+        #print(f"Robot pos: {robot_pos}")
+        robot_pos = self.get_body_position("front_camera_mount")
+        #print(f"Robot pos 2: {robot_pos}")
+        #print(f"Goal pos: {self.goal_pos}")
+        #time.sleep(1)
+
         distance = np.linalg.norm(robot_pos[:2] - self.goal_pos[:2])
+        distance = distance ** 2
+
         return distance
 
 
@@ -84,9 +93,14 @@ class RoboGymEnv(gym.Env):
 
         done = False
 
-        reward = reward * 1000    
-        reward = np.clip(reward, -0.05, 0.05)
-        
+        # Get raw reward from the environment and multiply it by 1000.
+        reward = reward * 100    
+        #reward = np.clip(reward, -0.05, 0.05)
+
+        # Penalize Thrashing
+        # reward -= 0.1 * np.linalg.norm(action)
+
+        # Reward success highly
         if(current_goal_distance <= self.success_threshold):
             reward += 100
             done = True
