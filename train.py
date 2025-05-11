@@ -15,10 +15,10 @@ from torch.utils.tensorboard import SummaryWriter
 if __name__ == '__main__':
 
     env_name = "boston_dynamics_spot"
-    replay_buffer_size = 100000
+    replay_buffer_size = 200000
     episodes = 3000
-    warmup = 10
-    batch_size = 64
+    warmup = 100
+    batch_size = 128
     pretrain_batch_size = 64
     updates_per_step = 1 
     gamma = 0.99
