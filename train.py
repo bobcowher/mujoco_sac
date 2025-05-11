@@ -30,7 +30,7 @@ if __name__ == '__main__':
     automatic_entropy_tuning = False
     hidden_size = 512 
     learning_rate = 0.0001
-    max_episode_steps=2000 # max episode steps
+    max_episode_steps=1500 # max episode steps
     alpha_decay = 0.0001
     step_repeat = 1 
 

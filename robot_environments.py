@@ -46,7 +46,7 @@ class RoboGymEnv(gym.Env):
         #time.sleep(1)
 
         distance = np.linalg.norm(robot_pos[:2] - self.goal_pos[:2])
-        distance = distance ** 2
+        distance = distance * 100
 
         return distance
 
@@ -81,21 +81,24 @@ class RoboGymEnv(gym.Env):
         return obs, total_reward, done, truncated, info
 
     def _step(self, action):
+        # Start with done as false.
+        done = False
+
         # Apply control input
         self.data.ctrl[:] = action
 
         # Step the simulation
         mujoco.mj_step(self.model, self.data)
 
+        # Get current Goal Distance and Compute Reward
         current_goal_distance = self.get_distance_to_goal()
         reward = max(0, self.nearest_distance - current_goal_distance)
         self.nearest_distance = min(self.nearest_distance, current_goal_distance)
 
-        done = False
 
         # Get raw reward from the environment and multiply it by 1000.
-        reward = reward * 100    
-        reward = np.clip(reward, -0.05, 1) # Clip upper considerably higher than lower. Don't over-penalize lower scores. 
+        #reward = reward * 100    
+        #reward = np.clip(reward, -0.05, 1) # Clip upper considerably higher than lower. Don't over-penalize lower scores. 
 
         # Penalize Thrashing
         # reward -= 0.1 * np.linalg.norm(action)
