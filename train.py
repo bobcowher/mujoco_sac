@@ -52,6 +52,7 @@ if __name__ == '__main__':
 
     # print(f"State shape: {state.shape}")
 
+    print("Camera shape: ", state['camera'].shape)
     
     # Agent
     agent = SAC(joint_obs_size, env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,

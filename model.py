@@ -27,7 +27,7 @@ class BaseNetwork(nn.Module):
         self.bn4 = nn.BatchNorm2d(64)        
         
         # Convolutional Layers
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=8, kernel_size=3, stride=2, padding=1)
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=3, stride=2, padding=1)
         self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3, stride=2, padding=1)
         self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2, padding=1)  # Third convolutional layer
         self.conv4 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=2, padding=1)
@@ -53,8 +53,8 @@ class BaseNetwork(nn.Module):
         x = dummy_input
 
         # Permute if needed (e.g., from HWC to CHW)
-        if x.shape[1] != 3:
-            x = x.permute(0, 3, 1, 2)  # From NHWC to NCHW
+        #if x.shape[1] != 3:
+        #    x = x.permute(0, 3, 1, 2)  # From NHWC to NCHW
 
         x = x / 255.0  # Normalize like in forward()
 
@@ -108,7 +108,8 @@ class QNetwork(BaseNetwork):
         joint_pos = obs['joint_pos'].float()
         joint_vel = obs['joint_vel'].float() 
 
-        x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
+        #x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
+        x = camera_obs
         x = x / 255.0
 
         x = self.bn1(F.relu(self.conv1(x)))
@@ -182,7 +183,8 @@ class GaussianPolicy(BaseNetwork):
         joint_pos = obs['joint_pos'].float()
         joint_vel = obs['joint_vel'].float()
 
-        x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
+        #x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
+        x = camera_obs
         x = x / 255.0
 
         x = self.bn1(F.relu(self.conv1(x)))
