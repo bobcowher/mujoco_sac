@@ -58,7 +58,7 @@ class RoboGymEnv(gym.Env):
         mujoco.mj_forward(self.model, self.data) # Data comes back as 0 without this.
 
         self.goal_pos = self.get_body_position("goal")
-        self.last_distance = self.get_distance_to_goal() 
+        self.nearest_distance = self.get_distance_to_goal() 
 
         self.current_step = 0
 
@@ -88,14 +88,14 @@ class RoboGymEnv(gym.Env):
         mujoco.mj_step(self.model, self.data)
 
         current_goal_distance = self.get_distance_to_goal()
-        reward = self.last_distance - current_goal_distance
-        self.last_distance = current_goal_distance
+        reward = max(0, self.nearest_distance - current_goal_distance)
+        self.nearest_distance = min(self.nearest_distance, current_goal_distance)
 
         done = False
 
         # Get raw reward from the environment and multiply it by 1000.
         reward = reward * 100    
-        #reward = np.clip(reward, -0.05, 0.05)
+        reward = np.clip(reward, -0.05, 1) # Clip upper considerably higher than lower. Don't over-penalize lower scores. 
 
         # Penalize Thrashing
         # reward -= 0.1 * np.linalg.norm(action)
