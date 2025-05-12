@@ -46,7 +46,7 @@ class RoboGymEnv(gym.Env):
         #time.sleep(1)
 
         distance = np.linalg.norm(robot_pos[:2] - self.goal_pos[:2])
-        distance = distance * 100
+        distance = distance * 1000
 
         return distance
 
