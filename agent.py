@@ -51,8 +51,8 @@ class SAC(object):
         #     self.policy_optim = Adam(self.policy.parameters(), lr=learning_rate)
 
     def select_action(self, state, evaluate=False, random=False):
-        # state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
-        # state = state.to(self.device).unsqueeze(0)
+        #state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
+        #state = state.to(self.device).unsqueeze(0)
 
         if random:
             action = self.env.action_space.sample()
@@ -67,7 +67,7 @@ class SAC(object):
 
     def obs_to_tensor(self, obs):
         return {
-            'camera': torch.from_numpy(obs['camera']).to(self.device),
+            'camera': torch.from_numpy(obs['camera']).unsqueeze(0).to(self.device),
             'joint_pos': torch.from_numpy(obs['joint_pos']).unsqueeze(0).to(self.device),
             'joint_vel': torch.from_numpy(obs['joint_vel']).unsqueeze(0).to(self.device)
         }

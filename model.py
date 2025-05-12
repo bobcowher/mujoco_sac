@@ -108,8 +108,14 @@ class QNetwork(BaseNetwork):
         joint_pos = obs['joint_pos'].float()
         joint_vel = obs['joint_vel'].float() 
 
+        
+
         #x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
         x = camera_obs
+
+        if x.dim() == 3:
+            x = x.unsqueeze(1)
+
         x = x / 255.0
 
         x = self.bn1(F.relu(self.conv1(x)))
@@ -183,8 +189,14 @@ class GaussianPolicy(BaseNetwork):
         joint_pos = obs['joint_pos'].float()
         joint_vel = obs['joint_vel'].float()
 
-        #x = camera_obs.permute(0, 3, 1, 2)  # (batch, 3, H, W) for CNN
         x = camera_obs
+        
+        if x.dim() == 3:
+        #    print(f"X before unsqueeze.")
+            x = x.unsqueeze(1)
+        #
+        #x = x.permute(1, 0, 2, 3)  # (batch, 3, H, W) for CNN
+
         x = x / 255.0
 
         x = self.bn1(F.relu(self.conv1(x)))
