@@ -27,7 +27,7 @@ if __name__ == '__main__':
     automatic_entropy_tuning = False
     hidden_size = 512 
     learning_rate = 0.0001
-    max_episode_steps=3000 # max episode steps
+    max_episode_steps=1000 # max episode steps
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     

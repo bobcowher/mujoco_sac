@@ -15,10 +15,10 @@ from torch.utils.tensorboard import SummaryWriter
 if __name__ == '__main__':
 
     env_name = "boston_dynamics_spot"
-    replay_buffer_size = 200000
+    replay_buffer_size = 500000
     episodes = 3000
-    warmup = 20
-    batch_size = 128
+    warmup = 100
+    batch_size = 64
     pretrain_batch_size = 64
     updates_per_step = 1 
     gamma = 0.99
@@ -28,9 +28,9 @@ if __name__ == '__main__':
     policy = "Gaussian"
     target_update_interval = 1
     automatic_entropy_tuning = False
-    hidden_size = 512 
+    hidden_size = 256 
     learning_rate = 0.0001
-    max_episode_steps=1500 # max episode steps
+    max_episode_steps=1000 # max episode steps
     alpha_decay = 0.0001
     step_repeat = 1 
 
