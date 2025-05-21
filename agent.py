@@ -146,10 +146,12 @@ class SAC(object):
                 next_state, reward, done, _, _ = self.env.step(action)  # Step
                 
                 if(debug):
-                    print(f"State: {state}")
-                    print(f"Next State: {next_state}")
-                    print(f"Reward: {reward}")
-                    print(f"Done: {done}")
+                    # print(f"State: {state}")
+                    # print(f"Next State: {next_state}")
+                    # print(f"Reward: {reward}")
+                    # print(f"Done: {done}")
+                    print(f"Robot Height: {self.env.get_robot_height()}")
+                    # print(f": {done}")
                     show_observation_image(state['camera'])
 
 

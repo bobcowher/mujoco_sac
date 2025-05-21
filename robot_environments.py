@@ -97,7 +97,11 @@ class RoboGymEnv(gym.Env):
         current_goal_distance = self.get_distance_to_goal()
         reward = max(0, self.nearest_distance - current_goal_distance)
         self.nearest_distance = min(self.nearest_distance, current_goal_distance)
-
+        
+        # See if the robot is upright, and deduct points. 
+        robot_height = self.get_robot_height()
+        if(robot_height < 0.6):
+            reward = reward - 0.1
 
         # Get raw reward from the environment and multiply it by 1000.
         #reward = reward * 100    
