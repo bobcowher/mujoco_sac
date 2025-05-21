@@ -83,7 +83,6 @@ class SAC(object):
         while not done:
             
             action = self.select_action(self.obs_to_tensor(obs=state))  # Sample action from policy
-            #print(f"Action: {action}")
             next_state, reward, done, _, _ = self.env.step(action)  # Step
             episode_steps += 1
             episode_reward += reward
@@ -109,12 +108,18 @@ class SAC(object):
         total_numsteps = 0
         updates = 0
         warmup_episode = True
+        debug = False
 
         for i_episode in range(episodes):
             episode_reward = 0
             episode_steps = 0
             done = False
             state, info = self.env.reset()
+
+            if(os.path.exists('./debug')):
+                debug = True
+            else:
+                debug = False
 
             if i_episode > warmup:
                 warmup_episode = False
@@ -139,6 +144,15 @@ class SAC(object):
                 #    print(f"Sampled action: {action}")
                 
                 next_state, reward, done, _, _ = self.env.step(action)  # Step
+                
+                if(debug):
+                    print(f"State: {state}")
+                    print(f"Next State: {next_state}")
+                    print(f"Reward: {reward}")
+                    print(f"Done: {done}")
+                    show_observation_image(state['camera'])
+
+
                 #print(f"Action: {action}")
                 #print(f"Reward: {reward} - Joint Pos: {state['joint_pos']}")
                 episode_steps += 1

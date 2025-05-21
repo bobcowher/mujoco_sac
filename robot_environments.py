@@ -36,7 +36,10 @@ class RoboGymEnv(gym.Env):
 
     def get_body_position(self, name):
         return self.data.xpos[self.model.body(name).id]
-    
+
+    def get_robot_height(self, name="front_camera_mount"):
+        return self.get_body_position("front_camera_mount")[2]
+
     def get_distance_to_goal(self):
         #robot_pos = self.data.qpos[:3]
         #print(f"Robot pos: {robot_pos}")

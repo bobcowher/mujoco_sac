@@ -1,3 +1,4 @@
+from os.path import join
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -35,9 +36,10 @@ class BaseNetwork(nn.Module):
 
         image_obs_size = self.calculate_conv_output(camera_obs_shape)
 
-        self.conv_compression_layer = nn.Linear(image_obs_size, 512)
-        self.joint_compression_layer = nn.Linear(joint_obs_size, 256)
-        self.action_compression_layer = nn.Linear(num_actions, 256)
+        self.compression_layer = nn.Linear(image_obs_size + joint_obs_size + num_actions, 512)
+        # self.conv_compression_layer = nn.Linear(image_obs_size, 512)
+        # self.joint_compression_layer = nn.Linear(joint_obs_size, 256)
+        # self.action_compression_layer = nn.Linear(num_actions, 256)
         
         print("")
         print("---------------------------")
@@ -86,12 +88,12 @@ class QNetwork(BaseNetwork):
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # Q1 architecture
-        self.linear1 = nn.Linear(1024, hidden_dim)
+        self.linear1 = nn.Linear(512, hidden_dim)
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, 1)
 
         # Q2 architecture
-        self.linear4 = nn.Linear(1024, hidden_dim)
+        self.linear4 = nn.Linear(512, hidden_dim)
         self.linear5 = nn.Linear(hidden_dim, hidden_dim)
         self.linear6 = nn.Linear(hidden_dim, 1)
 
@@ -126,11 +128,10 @@ class QNetwork(BaseNetwork):
 
         #print(f"X Shape before reshape: {x.shape}")
         x = x.reshape(x.size(0), -1)
-        x = self.conv_compression_layer(x)
-        xj = self.joint_compression_layer(torch.cat([joint_pos, joint_vel], dim=1))
-        xa = self.action_compression_layer(action)
+        
+        x = torch.cat([x, joint_pos, joint_vel, action], dim=1)
 
-        x = torch.cat([x , xj, xa], dim=1)
+        x = F.relu(self.compression_layer(x))
 
         x1 = F.relu(self.linear1(x))
         x1 = F.relu(self.linear2(x1))
@@ -160,7 +161,7 @@ class GaussianPolicy(BaseNetwork):
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # FC Layers
-        self.linear1 = nn.Linear(768, hidden_dim) # Make this dynamic
+        self.linear1 = nn.Linear(512, hidden_dim) # Make this dynamic
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, hidden_dim)
 
@@ -206,10 +207,9 @@ class GaussianPolicy(BaseNetwork):
         x = F.relu(self.conv5(x))
 
         x = x.reshape(x.size(0), -1)
-        x = self.conv_compression_layer(x)
-        xj = self.joint_compression_layer(torch.cat([joint_pos, joint_vel], dim=1))
+        x = torch.cat([x, joint_pos, joint_vel], dim=1)
  
-        x = torch.cat([x, xj], dim=1)
+        x = F.relu(self.compression_layer(x))
 
         x = F.relu(self.linear1(x))
         x = F.relu(self.linear2(x))

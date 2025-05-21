@@ -17,7 +17,7 @@ if __name__ == '__main__':
     env_name = "boston_dynamics_spot"
     replay_buffer_size = 500000
     episodes = 3000
-    warmup = 100
+    warmup = 10
     batch_size = 64
     pretrain_batch_size = 64
     updates_per_step = 1 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
                 hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=alpha_decay, min_alpha=min_alpha,
                 device=device, env=env)
 
-    # Tesnorboard
+    # Tensorboard
     episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size} A: {alpha} UPS: {updates_per_step} TUI: {target_update_interval} SR: {step_repeat} - clipped-rewards"
 
     summary_writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}')

@@ -1,5 +1,8 @@
 <mujoco model="spot scene">
-  <include file="spot.xml" />
+      
+<include file="spot.xml" />
+
+
 
   <statistic center="0.15 0.1 0.38" extent=".8" meansize="0.05" />
 
@@ -22,6 +25,8 @@
 
   <worldbody>
     <geom name="floor" size="0 0 0.05" type="plane" material="groundplane" />
+    <geom name="floor_shield" type="box" size="20 20 0.05" pos="0 0 -0.1" rgba="0 0 0 1" contype="0" conaffinity="0"/>
+
 
 <!--    <body name="box1" pos="0.5 0.0 0.1">
       <geom type="box" size="0.1 0.1 0.1" rgba="1 0 0 1" />
