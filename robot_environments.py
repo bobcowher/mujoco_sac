@@ -97,13 +97,13 @@ class RoboGymEnv(gym.Env):
 
         # Get current Goal Distance and Compute Reward
         current_goal_distance = self.get_distance_to_goal()
-        reward = max(0, self.nearest_distance - current_goal_distance)
+        reward = max(0, self.nearest_distance - current_goal_distance) * 10
         self.nearest_distance = min(self.nearest_distance, current_goal_distance)
         
         # See if the robot is upright, and deduct points. 
         robot_height = self.get_robot_height()
         if(robot_height < 0.6):
-            reward = reward - 1
+            reward = reward - (0.6 - robot_height)
 
         # Get raw reward from the environment and multiply it by 1000.
         #reward = reward * 100    
@@ -139,7 +139,7 @@ class RoboGymEnv(gym.Env):
         img = np.concatenate([front_img, bottom_img], dtype=np.uint8)
         #print(img.shape)
         #sys.exit(1)
-        img = cv2.resize(img, (240, 160), interpolation=cv2.INTER_AREA)
+        img = cv2.resize(img, (160, 240), interpolation=cv2.INTER_AREA)
         # print(f"Image shape after resize: {img.shape}")
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         # print(f"Image shape after cvtColor: {img.shape}")
