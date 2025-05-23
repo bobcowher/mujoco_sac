@@ -148,7 +148,7 @@ class SAC(object):
                 if(debug):
                     # print(f"State: {state}")
                     # print(f"Next State: {next_state}")
-                    # print(f"Reward: {reward}")
+                    print(f"Reward: {reward}")
                     # print(f"Done: {done}")
                     print(f"Robot Height: {self.env.get_robot_height()}")
                     # print(f": {done}")

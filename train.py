@@ -17,7 +17,7 @@ if __name__ == '__main__':
     env_name = "boston_dynamics_spot"
     replay_buffer_size = 500000
     episodes = 3000
-    warmup = 10
+    warmup = 20
     batch_size = 64
     pretrain_batch_size = 64
     updates_per_step = 1 
