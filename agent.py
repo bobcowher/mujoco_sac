@@ -89,6 +89,7 @@ class SAC(object):
 
             self.env.render()
             self.env.render(front_camera=True)
+            print(f"Distance: {self.env.get_robot_height()}")
 
             # img = self.sim.render(width=128, height=128, camera_name="front_camera")
             #img = env._get_image_obs()

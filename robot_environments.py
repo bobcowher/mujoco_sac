@@ -97,13 +97,18 @@ class RoboGymEnv(gym.Env):
 
         # Get current Goal Distance and Compute Reward
         current_goal_distance = self.get_distance_to_goal()
-        reward = max(0, self.nearest_distance - current_goal_distance) * 10
+        reward = max(0, self.nearest_distance - current_goal_distance)
         self.nearest_distance = min(self.nearest_distance, current_goal_distance)
         
         # See if the robot is upright, and deduct points. 
         robot_height = self.get_robot_height()
-        if(robot_height < 0.6):
-            reward = reward - (0.6 - robot_height)
+
+        if(robot_height < 0.7):
+            reward = reward - (0.7 - robot_height)
+
+        if(robot_height < 0.40):
+            done = True
+            reward = reward - 10
 
         # Get raw reward from the environment and multiply it by 1000.
         #reward = reward * 100    
@@ -161,7 +166,7 @@ class RoboGymEnv(gym.Env):
     def render(self, front_camera=False):
 
         if not front_camera:
-           plt.imshow(self._get_image_obs())
+           plt.imshow(self._get_image_obs().squeeze(0))
            plt.axis('off')
            plt.pause(0.0001)
            plt.clf() 
