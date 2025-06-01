@@ -5,6 +5,7 @@ from torch.optim import Adam, AdamW
 from sac_utils import *
 from model import *
 import time
+from robot_environments import RoboGymEnv
 
 
 class SAC(object):
@@ -14,7 +15,7 @@ class SAC(object):
         self.gamma = gamma
         self.tau = tau
         self.alpha = alpha
-        self.env = env
+        self.env : RoboGymEnv = env
 
         self.policy_type = policy
         self.target_update_interval = target_update_interval
@@ -26,7 +27,7 @@ class SAC(object):
                                camera_obs_shape=(1, 160, 240),
                                num_actions=action_space.shape[0], 
                                hidden_dim=hidden_size).to(device=self.device)
-        self.critic_optim = AdamW(self.critic.parameters(), lr=learning_rate)
+        self.critic_optim = Adam(self.critic.parameters(), lr=learning_rate)
         
         self.critic_target = QNetwork(joint_obs_size=joint_obs_size, 
                                camera_obs_shape=(1, 160, 240),
@@ -89,7 +90,8 @@ class SAC(object):
 
             self.env.render()
             self.env.render(front_camera=True)
-            print(f"Distance: {self.env.get_robot_height()}")
+            print(f"Ground Distance: {self.env.get_robot_height()}. Distance to Goal: {self.env.get_distance_to_goal()} Reward: {reward}")
+
 
             # img = self.sim.render(width=128, height=128, camera_name="front_camera")
             #img = env._get_image_obs()

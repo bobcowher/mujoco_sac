@@ -63,7 +63,7 @@ class RoboGymEnv(gym.Env):
         mujoco.mj_forward(self.model, self.data) # Data comes back as 0 without this.
 
         self.goal_pos = self.get_body_position("goal")
-        self.nearest_distance = self.get_distance_to_goal() 
+        self.last_goal_distance = self.get_distance_to_goal() 
 
         self.current_step = 0
 
@@ -97,14 +97,16 @@ class RoboGymEnv(gym.Env):
 
         # Get current Goal Distance and Compute Reward
         current_goal_distance = self.get_distance_to_goal()
-        reward = max(0, self.nearest_distance - current_goal_distance)
-        self.nearest_distance = min(self.nearest_distance, current_goal_distance)
+        reward = self.last_goal_distance - current_goal_distance
+        
+        # Set last goal distance to current goal distance. 
+        self.last_goal_distance = current_goal_distance
         
         # See if the robot is upright, and deduct points. 
         robot_height = self.get_robot_height()
 
         if(robot_height < 0.7):
-            reward = reward - (0.7 - robot_height)
+            reward = 0.7 - robot_height
 
         if(robot_height < 0.40):
             done = True

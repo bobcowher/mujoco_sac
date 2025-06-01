@@ -168,18 +168,18 @@
   </contact>
   
   <actuator>
-    <motor name="fl_hx" joint="fl_hx" ctrlrange="-2 2" gear="60"/>
-    <motor name="fl_hy" joint="fl_hy" ctrlrange="-2 2" gear="60"/>
-    <motor name="fl_kn" joint="fl_kn" ctrlrange="-2 2" gear="60"/>
-    <motor name="fr_hx" joint="fr_hx" ctrlrange="-2 2" gear="60"/>
-    <motor name="fr_hy" joint="fr_hy" ctrlrange="-2 2" gear="60"/>
-    <motor name="fr_kn" joint="fr_kn" ctrlrange="-2 2" gear="60"/>
-    <motor name="hl_hx" joint="hl_hx" ctrlrange="-2 2" gear="60"/>
-    <motor name="hl_hy" joint="hl_hy" ctrlrange="-2 2" gear="60"/>
-    <motor name="hl_kn" joint="hl_kn" ctrlrange="-2 2" gear="60"/>
-    <motor name="hr_hx" joint="hr_hx" ctrlrange="-2 2" gear="60"/>
-    <motor name="hr_hy" joint="hr_hy" ctrlrange="-2 2" gear="60"/>
-    <motor name="hr_kn" joint="hr_kn" ctrlrange="-2 2" gear="60"/>
+    <motor name="fl_hx" joint="fl_hx" ctrlrange="-2 2" gear="100"/>
+    <motor name="fl_hy" joint="fl_hy" ctrlrange="-2 2" gear="100"/>
+    <motor name="fl_kn" joint="fl_kn" ctrlrange="-2 2" gear="100"/>
+    <motor name="fr_hx" joint="fr_hx" ctrlrange="-2 2" gear="100"/>
+    <motor name="fr_hy" joint="fr_hy" ctrlrange="-2 2" gear="100"/>
+    <motor name="fr_kn" joint="fr_kn" ctrlrange="-2 2" gear="100"/>
+    <motor name="hl_hx" joint="hl_hx" ctrlrange="-2 2" gear="100"/>
+    <motor name="hl_hy" joint="hl_hy" ctrlrange="-2 2" gear="100"/>
+    <motor name="hl_kn" joint="hl_kn" ctrlrange="-2 2" gear="100"/>
+    <motor name="hr_hx" joint="hr_hx" ctrlrange="-2 2" gear="100"/>
+    <motor name="hr_hy" joint="hr_hy" ctrlrange="-2 2" gear="100"/>
+    <motor name="hr_kn" joint="hr_kn" ctrlrange="-2 2" gear="100"/>
   </actuator>
 
   <!-- <actuator>
