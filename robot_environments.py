@@ -30,11 +30,18 @@ class RoboGymEnv(gym.Env):
         # print(f"self.goal_pos: {self.goal_pos}")
         self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(self.model.nu,), dtype=np.float32)
         obs_dim = obs['camera'].shape[0]  # Position + velocity + target position
+        img_shape = self._get_image_obs().shape
+        self.observation_space = gym.spaces.Dict({
+            'camera': gym.spaces.Box(low=0, high=255, shape=img_shape, dtype=np.uint8),
+            'joint_pos': gym.spaces.Box(low=-np.inf, high=np.inf, shape=(self.model.nq,), dtype=np.float32),
+            'joint_vel': gym.spaces.Box(low=-np.inf, high=np.inf, shape=(self.model.nv,), dtype=np.float32),
+        })
+
         # print(f"Obs dim: {obs_dim}"
         
         # print(f"Obs dim: {self.model.nq}")
         # print(f"Obs dim: {self.model.nv}")
-        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
+        # self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
     def get_body_position(self, name):
         return self.data.xpos[self.model.body(name).id]
@@ -51,7 +58,6 @@ class RoboGymEnv(gym.Env):
         #time.sleep(1)
 
         distance = np.linalg.norm(robot_pos[:2] - self.goal_pos[:2])
-        distance = distance * 1000
 
         return distance
 
@@ -97,7 +103,8 @@ class RoboGymEnv(gym.Env):
 
         # Get current Goal Distance and Compute Reward
         current_goal_distance = self.get_distance_to_goal()
-        reward = self.last_goal_distance - current_goal_distance
+        progress = self.last_goal_distance - current_goal_distance
+        reward = progress * 1000 # Reward multiplier for progress towards the goal.
         
         # Set last goal distance to current goal distance. 
         self.last_goal_distance = current_goal_distance
@@ -106,12 +113,12 @@ class RoboGymEnv(gym.Env):
         robot_height = self.get_robot_height()
 
         if(robot_height < 0.7):
-            reward = 0.7 - robot_height
+            reward -= (0.7 - robot_height) * 1 # Reward multiplier for falling.
 
         if(robot_height < 0.40):
             done = True
-            reward = reward - 10
-
+        #     reward = reward - 10
+        #
         # Get raw reward from the environment and multiply it by 1000.
         #reward = reward * 100    
         #reward = np.clip(reward, -0.05, 1) # Clip upper considerably higher than lower. Don't over-penalize lower scores. 

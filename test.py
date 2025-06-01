@@ -37,7 +37,7 @@ if __name__ == '__main__':
     joint_obs_size = state['joint_pos'].shape[0] + state['joint_vel'].shape[0]
 
 
-    print(env.observation_space.shape[0])
+    # print(env.observation_space.shape[0])
     # Agent
     agent = SAC(joint_obs_size=joint_obs_size, action_space=env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
                 target_update_interval=target_update_interval, automatic_entropy_tuning=automatic_entropy_tuning,
