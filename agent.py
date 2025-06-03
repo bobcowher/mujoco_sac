@@ -90,7 +90,8 @@ class SAC(object):
 
             self.env.render()
             self.env.render(front_camera=True)
-            print(f"Ground Distance: {self.env.get_robot_height()}. Distance to Goal: {self.env.get_distance_to_goal()} Reward: {reward}")
+            print(f"Ground Distance: {self.env.get_robot_height()}. Distance to Goal: {self.env.get_distance_to_goal()} Reward: {reward} Action: {action}")
+            # print(f"QPos: {self.env.data.qpos}")
 
 
             # img = self.sim.render(width=128, height=128, camera_name="front_camera")
@@ -130,6 +131,7 @@ class SAC(object):
             while not done:
 
                 action = self.select_action(self.obs_to_tensor(obs=state), random=warmup_episode)  # Sample action from policy
+               
 
                 if memory.can_sample(batch_size=batch_size) and not warmup_episode:
                     # Number of updates per step in environment

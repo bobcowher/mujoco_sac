@@ -64,7 +64,8 @@ class RoboGymEnv(gym.Env):
 
     def reset(self, *, seed=None, options=None):
         # Reset simulation to initial state
-        mujoco.mj_resetData(self.model, self.data)
+        # mujoco.mj_resetData(self.model, self.data)
+        mujoco.mj_resetDataKeyframe(self.model, self.data, 0)
 
         mujoco.mj_forward(self.model, self.data) # Data comes back as 0 without this.
 
@@ -75,6 +76,7 @@ class RoboGymEnv(gym.Env):
 
         # Optional: add randomization here
         return self._get_obs(), {}
+
 
     def step(self, action):
 
@@ -110,14 +112,14 @@ class RoboGymEnv(gym.Env):
         self.last_goal_distance = current_goal_distance
         
         # See if the robot is upright, and deduct points. 
-        robot_height = self.get_robot_height()
+        # robot_height = self.get_robot_height()
 
-        if(robot_height < 0.7):
-            reward -= (0.7 - robot_height) * 1 # Reward multiplier for falling.
-
-        if(robot_height < 0.40):
-            done = True
-        #     reward = reward - 10
+        # if(robot_height < 0.7):
+        #     reward -= (0.7 - robot_height) * 1 # Reward multiplier for falling.
+        #
+        # if(robot_height < 0.40):
+        #     done = True
+        # #     reward = reward - 10
         #
         # Get raw reward from the environment and multiply it by 1000.
         #reward = reward * 100    
