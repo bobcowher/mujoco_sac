@@ -7,7 +7,7 @@ import os
 import sys
 
 LOG_SIG_MAX = 2
-LOG_SIG_MIN = -20
+LOG_SIG_MIN = -2
 epsilon = 1e-6
 
 # Initialize Policy weights
