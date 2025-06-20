@@ -106,8 +106,8 @@ class RoboGymEnv(gym.Env):
         # Get current Goal Distance and Compute Reward
         current_goal_distance = self.get_distance_to_goal()
         progress = self.last_goal_distance - current_goal_distance
-        reward = progress * 1000 # Reward multiplier for progress towards the goal.
-        
+        reward = np.sign(progress) * np.log1p(abs(progress * 1000))
+
         # Set last goal distance to current goal distance. 
         self.last_goal_distance = current_goal_distance
         
