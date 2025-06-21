@@ -149,13 +149,13 @@ class RoboGymEnv(gym.Env):
         self.renderer.update_scene(self.data, camera="forward_camera")
         front_img = self.renderer.render()
         
-        self.renderer.update_scene(self.data, camera="down_camera")
-        bottom_img = self.renderer.render()
+        #self.renderer.update_scene(self.data, camera="down_camera")
+        #bottom_img = self.renderer.render()
 
-        img = np.concatenate([front_img, bottom_img], dtype=np.uint8)
+        # img = np.concatenate([front_img, bottom_img], dtype=np.uint8)
         #print(img.shape)
         #sys.exit(1)
-        img = cv2.resize(img, (160, 240), interpolation=cv2.INTER_AREA)
+        img = cv2.resize(front_img, (80, 80), interpolation=cv2.INTER_AREA)
         # print(f"Image shape after resize: {img.shape}")
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         # print(f"Image shape after cvtColor: {img.shape}")

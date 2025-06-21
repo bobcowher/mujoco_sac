@@ -24,20 +24,20 @@ class SAC(object):
         self.device = device 
 
         self.critic = QNetwork(joint_obs_size=joint_obs_size, 
-                               camera_obs_shape=(1, 160, 240),
+                               camera_obs_shape=(1, 80, 80),
                                num_actions=action_space.shape[0], 
                                hidden_dim=hidden_size).to(device=self.device)
         self.critic_optim = Adam(self.critic.parameters(), lr=learning_rate)
         
         self.critic_target = QNetwork(joint_obs_size=joint_obs_size, 
-                               camera_obs_shape=(1, 160, 240),
+                               camera_obs_shape=(1, 80, 80),
                                num_actions=action_space.shape[0], 
                                hidden_dim=hidden_size).to(device=self.device)
  
         hard_update(self.critic_target, self.critic)
 
         self.policy = GaussianPolicy(joint_obs_size=joint_obs_size, 
-                                     camera_obs_shape=(1, 160, 240),
+                                     camera_obs_shape=(1, 80, 80),
                                      num_actions=action_space.shape[0], 
                                      hidden_dim=hidden_size).to(self.device)
         self.policy_optim = Adam(self.policy.parameters(), lr=learning_rate)
