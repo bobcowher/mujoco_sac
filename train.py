@@ -18,9 +18,9 @@ if __name__ == '__main__':
     replay_buffer_size = 500000
     episodes = 3000
     warmup = 20
-    batch_size = 64
+    batch_size = 64 
     pretrain_batch_size = 64
-    updates_per_step = 1 
+    update_interval = 4 
     gamma = 0.99
     tau = 0.005
     alpha = 0.1 # Temperature parameter.
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     target_update_interval = 1
     automatic_entropy_tuning = False
     hidden_size = 512 
-    learning_rate = 0.0001
+    learning_rate = 0.0002
     max_episode_steps=2000 # max episode steps
     alpha_decay = 0.0001
     step_repeat = 1 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
                 device=device, env=env)
 
     # Tensorboard
-    episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size} A: {alpha} UPS: {updates_per_step} TUI: {target_update_interval} SR: {step_repeat} - clipped-rewards"
+    episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size} A: {alpha} UI: {update_interval} TUI: {target_update_interval} SR: {step_repeat} - clipped-rewards"
 
     summary_writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}')
 
@@ -73,7 +73,7 @@ if __name__ == '__main__':
                           joint_pos_dim=state['joint_pos'].shape[0],
                           joint_vel_dim=state['joint_vel'].shape[0],  
                           n_actions=env.action_space.shape[0],
-                          input_device='cpu',
+                          input_device=device,
                           output_device=device)
 
     # Training Loop
@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     agent.train(episodes=episodes, 
                 memory=memory, 
-                updates_per_step=updates_per_step, 
+                update_interval=update_interval, 
                 batch_size=batch_size, 
                 summary_writer=summary_writer, 
                 max_episode_steps=max_episode_steps,

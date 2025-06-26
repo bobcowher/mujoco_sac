@@ -98,7 +98,8 @@ class SAC(object):
             #img = env._get_image_obs()
 
 
-            time.sleep(0.005)
+            # time.sleep(0.005)
+            time.sleep(0.1)
 
             # Ignore the "done" signal if it comes from hitting the time horizon.
             # (https://github.com/openai/spinningup/blob/master/spinup/algos/sac/sac.py)
@@ -107,7 +108,7 @@ class SAC(object):
 
         print(f"Test run completed with score {episode_reward}")
 
-    def train(self, episodes, memory, updates_per_step, batch_size, summary_writer, max_episode_steps, warmup):
+    def train(self, episodes, memory, update_interval, batch_size, summary_writer, max_episode_steps, warmup):
         # Training Loop
         total_numsteps = 0
         updates = 0
@@ -131,19 +132,16 @@ class SAC(object):
             while not done:
 
                 action = self.select_action(self.obs_to_tensor(obs=state), random=warmup_episode)  # Sample action from policy
-               
 
-                if memory.can_sample(batch_size=batch_size) and not warmup_episode:
-                    # Number of updates per step in environment
-                    for i in range(updates_per_step):
-                        # Update parameters of all the networks
-                        critic_1_loss, critic_2_loss, policy_loss, alpha = self.update_parameters(memory, batch_size, updates)
+                if memory.can_sample(batch_size=batch_size) and not warmup_episode and episode_steps % update_interval == 0:
+                    # Update parameters of all the networks
+                    critic_1_loss, critic_2_loss, policy_loss, alpha = self.update_parameters(memory, batch_size, updates)
 
-                        summary_writer.add_scalar('loss/critic_1', critic_1_loss, updates)
-                        summary_writer.add_scalar('loss/critic_2', critic_2_loss, updates)
-                        summary_writer.add_scalar('loss/policy', policy_loss, updates)
-                        summary_writer.add_scalar('entropy_temprature/alpha', alpha, updates)
-                        updates += 1
+                    summary_writer.add_scalar('loss/critic_1', critic_1_loss, updates)
+                    summary_writer.add_scalar('loss/critic_2', critic_2_loss, updates)
+                    summary_writer.add_scalar('loss/policy', policy_loss, updates)
+                    summary_writer.add_scalar('entropy_temprature/alpha', alpha, updates)
+                    updates += 1
 
                 #if i_episode % 20 == 0 and episode_steps < 5:
                 #    print(f"Sampled action: {action}")
