@@ -106,28 +106,13 @@ class RoboGymEnv(gym.Env):
         # Get current Goal Distance and Compute Reward
         current_goal_distance = self.get_distance_to_goal()
         progress = self.last_goal_distance - current_goal_distance
-        reward = np.sign(progress) * np.log1p(abs(progress * 1000))
+        reward   =  5.0 * progress                                      # dense forward reward
+        reward  -= 0.002 * np.square(action).sum()                      # small torque cost
+        reward = np.clip(reward, -1.0, 1.0)                             # keep range stable
 
         # Set last goal distance to current goal distance. 
         self.last_goal_distance = current_goal_distance
         
-        # See if the robot is upright, and deduct points. 
-        # robot_height = self.get_robot_height()
-
-        # if(robot_height < 0.7):
-        #     reward -= (0.7 - robot_height) * 1 # Reward multiplier for falling.
-        #
-        # if(robot_height < 0.40):
-        #     done = True
-        # #     reward = reward - 10
-        #
-        # Get raw reward from the environment and multiply it by 1000.
-        #reward = reward * 100    
-        #reward = np.clip(reward, -0.05, 1) # Clip upper considerably higher than lower. Don't over-penalize lower scores. 
-
-        # Penalize Thrashing
-        # reward -= 0.1 * np.linalg.norm(action)
-
         # Reward success highly
         if(current_goal_distance <= self.success_threshold):
             reward += 100
