@@ -90,7 +90,7 @@ class SAC(object):
 
             self.env.render()
             self.env.render(front_camera=True)
-            print(f"Ground Distance: {self.env.get_robot_height()}. Distance to Goal: {self.env.get_distance_to_goal()} Reward: {reward} Action: {action}")
+            print(f"Ground Distance: {self.env.get_robot_height()}. Distance to Goal: {self.env.get_distance_to_goal()} Reward: {reward} Action: {action} State: {state['joint_pos']}, {state['joint_vel']}")
             # print(f"QPos: {self.env.data.qpos}")
 
 

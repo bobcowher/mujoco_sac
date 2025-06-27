@@ -6,6 +6,8 @@ import sys
 import matplotlib.pyplot as plt
 import cv2
 import time
+import math
+
 
 from numpy.random import f
 
@@ -106,9 +108,9 @@ class RoboGymEnv(gym.Env):
         # Get current Goal Distance and Compute Reward
         current_goal_distance = self.get_distance_to_goal()
         progress = self.last_goal_distance - current_goal_distance
-        reward   =  5.0 * progress                                      # dense forward reward
+        reward   =  20.0 * progress                                      # dense forward reward
         reward  -= 0.002 * np.square(action).sum()                      # small torque cost
-        reward = np.clip(reward, -1.0, 1.0)                             # keep range stable
+        reward = np.clip(reward, -2.0, 2.0)                             # keep range stable
 
         # Set last goal distance to current goal distance. 
         self.last_goal_distance = current_goal_distance
@@ -152,9 +154,10 @@ class RoboGymEnv(gym.Env):
 
     def _get_obs(self):
         # Simple observation: joint pos + vel
+        # Normalizing joint_pos and joint_vel
         obs = {'camera': self._get_image_obs(),
-               'joint_pos': self.data.qpos,
-               'joint_vel': self.data.qvel}
+               'joint_pos': self.data.qpos / math.pi,
+               'joint_vel': self.data.qvel / 25}
 
         return obs 
 
