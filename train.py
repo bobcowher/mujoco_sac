@@ -31,7 +31,7 @@ if __name__ == '__main__':
     hidden_size = 512 
     learning_rate = 0.0001
     max_episode_steps=2000 # max episode steps
-    alpha_decay = 0.0001
+    alpha_decay = 0.0002
     step_repeat = 1 
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
