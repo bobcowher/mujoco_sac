@@ -98,8 +98,8 @@ class SAC(object):
             #img = env._get_image_obs()
 
 
-            # time.sleep(0.005)
-            time.sleep(0.1)
+            time.sleep(0.005)
+            # time.sleep(0.1)
 
             # Ignore the "done" signal if it comes from hitting the time horizon.
             # (https://github.com/openai/spinningup/blob/master/spinup/algos/sac/sac.py)

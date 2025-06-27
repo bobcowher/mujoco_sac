@@ -167,35 +167,55 @@
     <exclude body1="body" body2="hr_uleg"/>
   </contact>
   
-  <actuator>
-    <motor name="fl_hx" joint="fl_hx" gear="60"/>
-    <motor name="fl_hy" joint="fl_hy" gear="60"/>
-    <motor name="fl_kn" joint="fl_kn" gear="60"/>
-    <motor name="fr_hx" joint="fr_hx" gear="60"/>
-    <motor name="fr_hy" joint="fr_hy" gear="60"/>
-    <motor name="fr_kn" joint="fr_kn" gear="60"/>
-    <motor name="hl_hx" joint="hl_hx" gear="60"/>
-    <motor name="hl_hy" joint="hl_hy" gear="60"/>
-    <motor name="hl_kn" joint="hl_kn" gear="60"/>
-    <motor name="hr_hx" joint="hr_hx" gear="60"/>
-    <motor name="hr_hy" joint="hr_hy" gear="60"/>
-    <motor name="hr_kn" joint="hr_kn" gear="60"/>
-  </actuator>
+  <!-- <actuator> -->
+  <!--   <motor name="fl_hx" joint="fl_hx" gear="60"/> -->
+  <!--   <motor name="fl_hy" joint="fl_hy" gear="60"/> -->
+  <!--   <motor name="fl_kn" joint="fl_kn" gear="60"/> -->
+  <!--   <motor name="fr_hx" joint="fr_hx" gear="60"/> -->
+  <!--   <motor name="fr_hy" joint="fr_hy" gear="60"/> -->
+  <!--   <motor name="fr_kn" joint="fr_kn" gear="60"/> -->
+  <!--   <motor name="hl_hx" joint="hl_hx" gear="60"/> -->
+  <!--   <motor name="hl_hy" joint="hl_hy" gear="60"/> -->
+  <!--   <motor name="hl_kn" joint="hl_kn" gear="60"/> -->
+  <!--   <motor name="hr_hx" joint="hr_hx" gear="60"/> -->
+  <!--   <motor name="hr_hy" joint="hr_hy" gear="60"/> -->
+  <!--   <motor name="hr_kn" joint="hr_kn" gear="60"/> -->
+  <!-- </actuator> -->
+  <!---->
 
-  <!-- <actuator>
-    <position class="spot" name="fl_hx" joint="fl_hx"/>
-    <position class="spot" name="fl_hy" joint="fl_hy"/>
-    <position class="spot" name="fl_kn" joint="fl_kn"/>
-    <position class="spot" name="fr_hx" joint="fr_hx"/>
-    <position class="spot" name="fr_hy" joint="fr_hy"/>
-    <position class="spot" name="fr_kn" joint="fr_kn"/>
-    <position class="spot" name="hl_hx" joint="hl_hx"/>
-    <position class="spot" name="hl_hy" joint="hl_hy"/>
-    <position class="spot" name="hl_kn" joint="hl_kn"/>
-    <position class="spot" name="hr_hx" joint="hr_hx"/>
-    <position class="spot" name="hr_hy" joint="hr_hy"/>
-    <position class="spot" name="hr_kn" joint="hr_kn"/>
-  </actuator> -->
+  <actuator>
+    <!-- front-left leg -->
+    <position name="fl_hx" joint="fl_hx" kp="200" kv="5"
+              ctrllimited="true" ctrlrange="-0.785398 0.785398"/>
+    <position name="fl_hy" joint="fl_hy" kp="200" kv="5"
+              ctrllimited="true" ctrlrange="-0.898845 2.29511"/>
+    <position name="fl_kn" joint="fl_kn" kp="200" kv="5"
+              ctrllimited="true" ctrlrange="-2.7929 -0.254402"/>
+
+    <!-- front-right leg -->
+    <position name="fr_hx" joint="fr_hx" kp="200" kv="5"
+              ctrllimited="true" ctrlrange="-0.785398 0.785398"/>
+    <position name="fr_hy" joint="fr_hy" kp="200" kv="5"
+              ctrllimited="true" ctrlrange="-0.898845 2.24363"/>
+    <position name="fr_kn" joint="fr_kn" kp="200" kv="5"
+              ctrllimited="true" ctrlrange="-2.7929 -0.255648"/>
+
+    <!-- hind-left leg -->
+    <position name="hl_hx" joint="hl_hx" kp="200" kv="5"
+              ctrllimited="true" ctrlrange="-0.785398 0.785398"/>
+    <position name="hl_hy" joint="hl_hy" kp="200" kv="5"
+              ctrllimited="true" ctrlrange="-0.898845 2.29511"/>
+    <position name="hl_kn" joint="hl_kn" kp="200" kv="5"
+              ctrllimited="true" ctrlrange="-2.7929 -0.247067"/>
+
+    <!-- hind-right leg -->
+    <position name="hr_hx" joint="hr_hx" kp="200" kv="5"
+              ctrllimited="true" ctrlrange="-0.785398 0.785398"/>
+    <position name="hr_hy" joint="hr_hy" kp="200" kv="5"
+              ctrllimited="true" ctrlrange="-0.898845 2.29511"/>
+    <position name="hr_kn" joint="hr_kn" kp="200" kv="5"
+              ctrllimited="true" ctrlrange="-2.7929 -0.248282"/>
+  </actuator>
 
   <keyframe>
     <key name="home" qpos="

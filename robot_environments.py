@@ -19,6 +19,18 @@ class RoboGymEnv(gym.Env):
         self.viewer = None
         self.step_repeat = step_repeat
         self.model = mujoco.MjModel.from_xml_path(model_path)
+        # Order must match the actuator order in spot.xml
+        joint_names = ["fl_hx","fl_hy","fl_kn",
+                       "fr_hx","fr_hy","fr_kn",
+                       "hl_hx","hl_hy","hl_kn",
+                       "hr_hx","hr_hy","hr_kn"]
+
+        self.jnt_ids  = [self.model.joint(name).id for name in joint_names]
+        jnt_ranges    = self.model.jnt_range[self.jnt_ids]          # (12, 2)
+
+        self.jnt_mid  = 0.5 * (jnt_ranges[:, 0] + jnt_ranges[:, 1]) # (12,)
+        self.jnt_half = 0.5 * (jnt_ranges[:, 1] - jnt_ranges[:, 0]) # (12,)
+
         self.data = mujoco.MjData(self.model)
         self.success_threshold = 1
         self.max_episode_steps = max_episode_steps
@@ -99,8 +111,11 @@ class RoboGymEnv(gym.Env):
         # Start with done as false.
         done = False
 
+        action = self.jnt_mid + action * self.jnt_half
         # Apply control input
+        
         self.data.ctrl[:] = action
+        
 
         # Step the simulation
         mujoco.mj_step(self.model, self.data)
