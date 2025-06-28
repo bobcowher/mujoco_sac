@@ -1,6 +1,7 @@
 import os
 import torch
 import torch.nn.functional as F
+import numpy as np
 from torch.optim import Adam, AdamW
 from sac_utils import *
 from model import *
@@ -10,7 +11,7 @@ from robot_environments import RoboGymEnv
 
 class SAC(object):
     def __init__(self, joint_obs_size, action_space, gamma, tau, alpha, policy, target_update_interval,
-                 automatic_entropy_tuning, hidden_size, learning_rate, alpha_decay, device, env, min_alpha=0.05):
+                 automatic_entropy_tuning, hidden_size, learning_rate, device, env, min_alpha=0.05):
 
         self.gamma = gamma
         self.tau = tau
@@ -19,9 +20,22 @@ class SAC(object):
 
         self.policy_type = policy
         self.target_update_interval = target_update_interval
-        self.automatic_entropy_tuning = automatic_entropy_tuning
 
+        self.automatic_entropy_tuning = automatic_entropy_tuning
         self.device = device 
+
+        if self.automatic_entropy_tuning:
+            # target_entropy ≈ −|A|
+            self.target_entropy = -0.98 * action_space.shape[0]
+        
+            # log α is the trainable parameter; start from log(α0)
+            self.log_alpha = torch.tensor(np.log(alpha),
+                                            requires_grad=True,
+                                            device=self.device)
+            self.alpha_optim = Adam([self.log_alpha], lr=learning_rate)
+        else:
+            self.alpha = alpha
+
 
         self.critic = QNetwork(joint_obs_size=joint_obs_size, 
                                camera_obs_shape=(1, 80, 80),
@@ -42,7 +56,6 @@ class SAC(object):
                                      hidden_dim=hidden_size).to(self.device)
         self.policy_optim = Adam(self.policy.parameters(), lr=learning_rate)
 
-        self.alpha_decay = alpha_decay
         self.min_alpha = min_alpha
 
         # else:
@@ -222,13 +235,14 @@ class SAC(object):
         policy_loss.backward()
         self.policy_optim.step()
 
-        # Update alpha. 
-        if(self.alpha > self.min_alpha and updates % 200 == 0):
-            #self.alpha = self.alpha * (1 - (self.alpha_decay * (10 * self.alpha)))
-            self.alpha = self.alpha * (1 - self.alpha_decay)
-        
-        if(updates % int(5e5) == 0):
-            self.alpha_decay = self.alpha_decay * 0.75
+        if self.automatic_entropy_tuning:
+            alpha_loss = (self.log_alpha.exp() *
+                         (-log_pi - self.target_entropy).detach()).mean()
+
+            self.alpha_optim.zero_grad()
+            alpha_loss.backward()
+            self.alpha_optim.step()
+            self.alpha = self.log_alpha.exp().item()   # scalar for later
 
         if updates % self.target_update_interval == 0:
             soft_update(self.critic_target, self.critic, self.tau)

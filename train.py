@@ -27,7 +27,7 @@ if __name__ == '__main__':
     min_alpha = alpha
     policy = "Gaussian"
     target_update_interval = 1
-    automatic_entropy_tuning = False
+    automatic_entropy_tuning = True 
     hidden_size = 512 
     learning_rate = 0.0001
     max_episode_steps=2000 # max episode steps
@@ -57,11 +57,11 @@ if __name__ == '__main__':
     # Agent
     agent = SAC(joint_obs_size, env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
                 target_update_interval=target_update_interval, automatic_entropy_tuning=automatic_entropy_tuning,
-                hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=alpha_decay, min_alpha=min_alpha,
+                hidden_size=hidden_size, learning_rate=learning_rate, min_alpha=min_alpha,
                 device=device, env=env)
 
     # Tensorboard
-    episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size} A: {alpha} UI: {update_interval} TUI: {target_update_interval} SR: {step_repeat} - clipped-rewards"
+    episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size} A: {alpha} UI: {update_interval} TUI: {target_update_interval} SR: {step_repeat} - AET: {automatic_entropy_tuning}"
 
     summary_writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}')
 

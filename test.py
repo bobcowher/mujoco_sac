@@ -27,11 +27,11 @@ if __name__ == '__main__':
     automatic_entropy_tuning = False
     hidden_size = 512 
     learning_rate = 0.0001
-    max_episode_steps=1000 # max episode steps
+    max_episode_steps=2000 # max episode steps
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    env = RoboGymEnv(robot="boston_dynamics_spot", max_episode_steps=max_episode_steps)
+    env = RoboGymEnv(robot="boston_dynamics_spot", max_episode_steps=max_episode_steps, step_repeat=1)
     state, info = env.reset()
 
     joint_obs_size = state['joint_pos'].shape[0] + state['joint_vel'].shape[0]
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     # Agent
     agent = SAC(joint_obs_size=joint_obs_size, action_space=env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
                 target_update_interval=target_update_interval, automatic_entropy_tuning=automatic_entropy_tuning,
-                hidden_size=hidden_size, learning_rate=learning_rate, alpha_decay=0.01, device=device, env=env)
+                hidden_size=hidden_size, learning_rate=learning_rate, device=device, env=env)
 
     agent.load_checkpoint()
 
