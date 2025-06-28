@@ -16,11 +16,11 @@ if __name__ == '__main__':
 
     env_name = "boston_dynamics_spot"
     replay_buffer_size = 500000
-    episodes = 3000
+    episodes = 10000
     warmup = 20
     batch_size = 64 
     pretrain_batch_size = 64
-    update_interval = 4 
+    update_interval = 2 
     gamma = 0.99
     tau = 0.005
     alpha = 0.1 # Temperature parameter.

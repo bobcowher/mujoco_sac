@@ -57,16 +57,6 @@
   <worldbody>
     <light name="spotlight" mode="targetbodycom" target="body" pos="3 0 4" cutoff="30"/>
     <body name="body" childclass="spot" pos="0 0 .75">
-      <!-- <body name="front_camera_mount" pos="-0.1 0 0.65" quat="0.9848 0 0.1736 0"> -->
-      <body name="front_camera_mount" pos="0.4 0 0" quat="0.9914 0 0.1305 0">
-        <camera name="forward_camera" pos="0 0 0" xyaxes="0 -1 0 0 0 1"/>
-      </body>
-      
-      <body name="down_camera_mount" pos="0.4 0 0" quat="0.6 0 0.4 0">
-        <camera name="down_camera" pos="0 0 0" xyaxes="0 -1 0 0 0 1"/>
-      </body>
-    
-
       <light name="tracking" mode="trackcom" pos="0 0 2"/>
       <freejoint name="freejoint"/>
       <inertial pos="0.0063944 -9.81216e-05 0.000911379" mass="32.86" diaginertia="0.13144 0.13144 0.13144"/>
@@ -166,22 +156,7 @@
     <exclude body1="body" body2="hl_uleg"/>
     <exclude body1="body" body2="hr_uleg"/>
   </contact>
-  
-  <!-- <actuator> -->
-  <!--   <motor name="fl_hx" joint="fl_hx" gear="60"/> -->
-  <!--   <motor name="fl_hy" joint="fl_hy" gear="60"/> -->
-  <!--   <motor name="fl_kn" joint="fl_kn" gear="60"/> -->
-  <!--   <motor name="fr_hx" joint="fr_hx" gear="60"/> -->
-  <!--   <motor name="fr_hy" joint="fr_hy" gear="60"/> -->
-  <!--   <motor name="fr_kn" joint="fr_kn" gear="60"/> -->
-  <!--   <motor name="hl_hx" joint="hl_hx" gear="60"/> -->
-  <!--   <motor name="hl_hy" joint="hl_hy" gear="60"/> -->
-  <!--   <motor name="hl_kn" joint="hl_kn" gear="60"/> -->
-  <!--   <motor name="hr_hx" joint="hr_hx" gear="60"/> -->
-  <!--   <motor name="hr_hy" joint="hr_hy" gear="60"/> -->
-  <!--   <motor name="hr_kn" joint="hr_kn" gear="60"/> -->
-  <!-- </actuator> -->
-  <!---->
+
   <actuator>
     <position class="spot" name="fl_hx" joint="fl_hx"/>
     <position class="spot" name="fl_hy" joint="fl_hy"/>
@@ -197,40 +172,6 @@
     <position class="spot" name="hr_kn" joint="hr_kn"/>
   </actuator>
 
-  <!-- <actuator> -->
-  <!--   <!-- front-left leg --> -->
-  <!--   <position name="fl_hx" joint="fl_hx" kp="200" kv="5" -->
-  <!--             ctrllimited="true" ctrlrange="-0.785398 0.785398"/> -->
-  <!--   <position name="fl_hy" joint="fl_hy" kp="200" kv="5" -->
-  <!--             ctrllimited="true" ctrlrange="-0.898845 2.29511"/> -->
-  <!--   <position name="fl_kn" joint="fl_kn" kp="200" kv="5" -->
-  <!--             ctrllimited="true" ctrlrange="-2.7929 -0.254402"/> -->
-  <!---->
-  <!--   <!-- front-right leg --> -->
-  <!--   <position name="fr_hx" joint="fr_hx" kp="200" kv="5" -->
-  <!--             ctrllimited="true" ctrlrange="-0.785398 0.785398"/> -->
-  <!--   <position name="fr_hy" joint="fr_hy" kp="200" kv="5" -->
-  <!--             ctrllimited="true" ctrlrange="-0.898845 2.24363"/> -->
-  <!--   <position name="fr_kn" joint="fr_kn" kp="200" kv="5" -->
-  <!--             ctrllimited="true" ctrlrange="-2.7929 -0.255648"/> -->
-  <!---->
-  <!--   <!-- hind-left leg --> -->
-  <!--   <position name="hl_hx" joint="hl_hx" kp="200" kv="5" -->
-  <!--             ctrllimited="true" ctrlrange="-0.785398 0.785398"/> -->
-  <!--   <position name="hl_hy" joint="hl_hy" kp="200" kv="5" -->
-  <!--             ctrllimited="true" ctrlrange="-0.898845 2.29511"/> -->
-  <!--   <position name="hl_kn" joint="hl_kn" kp="200" kv="5" -->
-  <!--             ctrllimited="true" ctrlrange="-2.7929 -0.247067"/> -->
-  <!---->
-  <!--   <!-- hind-right leg --> -->
-  <!--   <position name="hr_hx" joint="hr_hx" kp="200" kv="5" -->
-  <!--             ctrllimited="true" ctrlrange="-0.785398 0.785398"/> -->
-  <!--   <position name="hr_hy" joint="hr_hy" kp="200" kv="5" -->
-  <!--             ctrllimited="true" ctrlrange="-0.898845 2.29511"/> -->
-  <!--   <position name="hr_kn" joint="hr_kn" kp="200" kv="5" -->
-  <!--             ctrllimited="true" ctrlrange="-2.7929 -0.248282"/> -->
-  <!-- </actuator> -->
-  <!---->
   <keyframe>
     <key name="home" qpos="
     0 0 0.46
