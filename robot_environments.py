@@ -123,8 +123,7 @@ class RoboGymEnv(gym.Env):
         # Get current Goal Distance and Compute Reward
         current_goal_distance = self.get_distance_to_goal()
         progress = self.last_goal_distance - current_goal_distance
-        reward   =  20.0 * progress                                      # dense forward reward
-        reward = np.clip(reward, -2.0, 2.0)                             # keep range stable
+        reward = np.clip(100 * progress, -10.0, 10.0)                             # keep range stable
 
         # Set last goal distance to current goal distance. 
         self.last_goal_distance = current_goal_distance
