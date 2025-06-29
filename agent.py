@@ -11,7 +11,7 @@ from robot_environments import RoboGymEnv
 
 class SAC(object):
     def __init__(self, joint_obs_size, action_space, gamma, tau, alpha, policy, target_update_interval,
-                 automatic_entropy_tuning, hidden_size, learning_rate, device, env, min_alpha=0.05):
+                 automatic_entropy_tuning, hidden_size, learning_rate, device, env, entropy_scalar):
 
         self.gamma = gamma
         self.tau = tau
@@ -22,19 +22,19 @@ class SAC(object):
         self.target_update_interval = target_update_interval
 
         self.automatic_entropy_tuning = automatic_entropy_tuning
-        self.device = device 
+        self.device = device
+        self.aet_warmup_episodes = 150
+        self.aet_warmup_steps = self.aet_warmup_episodes * self.env.max_episode_steps 
 
         if self.automatic_entropy_tuning:
             # target_entropy ≈ −|A|
-            self.target_entropy = -0.98 * action_space.shape[0]
+            self.target_entropy = -entropy_scalar * action_space.shape[0]
         
             # log α is the trainable parameter; start from log(α0)
             self.log_alpha = torch.tensor(np.log(alpha),
                                             requires_grad=True,
                                             device=self.device)
             self.alpha_optim = Adam([self.log_alpha], lr=learning_rate)
-        else:
-            self.alpha = alpha
 
 
         self.critic = QNetwork(joint_obs_size=joint_obs_size, 
@@ -56,13 +56,18 @@ class SAC(object):
                                      hidden_dim=hidden_size).to(self.device)
         self.policy_optim = Adam(self.policy.parameters(), lr=learning_rate)
 
-        self.min_alpha = min_alpha
-
-        # else:
-        #     self.alpha = 0
-        #     self.automatic_entropy_tuning = False
-        #     self.policy = DeterministicPolicy(num_inputs, action_space.shape[0], hidden_size, action_space).to(self.device)
-        #     self.policy_optim = Adam(self.policy.parameters(), lr=learning_rate)
+        # Successful Initiation 
+        print("Successfully initialized the agent")
+        print("-" * 20)
+        print("AET:                 ", self.automatic_entropy_tuning)
+        
+        if(self.automatic_entropy_tuning):
+            print("AET Warmup Episodes: ", self.aet_warmup_episodes)
+            print("AET Warmup Steps:    ", self.aet_warmup_steps)
+            print("Target Entropy:      ", self.target_entropy)
+        print("Alpha:               ", self.alpha)
+        print("-" * 20)
+        
 
     def select_action(self, state, evaluate=False, random=False):
         #state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
@@ -235,7 +240,7 @@ class SAC(object):
         policy_loss.backward()
         self.policy_optim.step()
 
-        if self.automatic_entropy_tuning:
+        if self.automatic_entropy_tuning and updates > self.aet_warmup_steps:
             alpha_loss = (self.log_alpha.exp() *
                          (-log_pi - self.target_entropy).detach()).mean()
 

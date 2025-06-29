@@ -27,12 +27,13 @@ if __name__ == '__main__':
     min_alpha = alpha
     policy = "Gaussian"
     target_update_interval = 1
-    automatic_entropy_tuning = False 
+    automatic_entropy_tuning = True 
     hidden_size = 512 
     learning_rate = 0.0001
     max_episode_steps=2000 # max episode steps
     alpha_decay = 0.0002
     step_repeat = 1 
+    entropy_scalar = 0.2
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -57,11 +58,11 @@ if __name__ == '__main__':
     # Agent
     agent = SAC(joint_obs_size, env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
                 target_update_interval=target_update_interval, automatic_entropy_tuning=automatic_entropy_tuning,
-                hidden_size=hidden_size, learning_rate=learning_rate, min_alpha=min_alpha,
-                device=device, env=env)
+                hidden_size=hidden_size, learning_rate=learning_rate, device=device, env=env, 
+                entropy_scalar=entropy_scalar)
 
     # Tensorboard
-    episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size} A: {alpha} UI: {update_interval} TUI: {target_update_interval} SR: {step_repeat} - AET: {automatic_entropy_tuning}"
+    episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size} A: {alpha} ES: {entropy_scalar} UI: {update_interval} TUI: {target_update_interval} SR: {step_repeat} - AET: {automatic_entropy_tuning}"
 
     summary_writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}')
 
