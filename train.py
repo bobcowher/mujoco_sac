@@ -27,7 +27,7 @@ if __name__ == '__main__':
     min_alpha = alpha
     policy = "Gaussian"
     target_update_interval = 1
-    automatic_entropy_tuning = True 
+    automatic_entropy_tuning = False 
     hidden_size = 512 
     learning_rate = 0.0001
     max_episode_steps=2000 # max episode steps
