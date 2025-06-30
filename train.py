@@ -33,7 +33,7 @@ if __name__ == '__main__':
     max_episode_steps=2000 # max episode steps
     alpha_decay = 0.0002
     step_repeat = 1 
-    entropy_scalar = 0.06
+    entropy_scalar = 0.01
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -62,7 +62,7 @@ if __name__ == '__main__':
                 entropy_scalar=entropy_scalar)
 
     # Tensorboard
-    episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size} A: {alpha} ES: {entropy_scalar} UI: {update_interval} TUI: {target_update_interval} SR: {step_repeat} - AET: {automatic_entropy_tuning}"
+    episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size} A: {alpha} ES: {entropy_scalar} UI: {update_interval} TUI: {target_update_interval} SR: {step_repeat} - AET: {automatic_entropy_tuning} - low-alpha-lr"
 
     summary_writer = SummaryWriter(f'runs/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{episode_identifier}')
 

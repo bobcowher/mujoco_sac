@@ -34,7 +34,7 @@ class SAC(object):
             self.log_alpha = torch.tensor(np.log(alpha),
                                             requires_grad=True,
                                             device=self.device)
-            self.alpha_optim = Adam([self.log_alpha], lr=learning_rate)
+            self.alpha_optim = Adam([self.log_alpha], lr=learning_rate * 0.5)
 
 
         self.critic = QNetwork(joint_obs_size=joint_obs_size, 
