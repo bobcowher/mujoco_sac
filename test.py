@@ -41,7 +41,7 @@ if __name__ == '__main__':
     # Agent
     agent = SAC(joint_obs_size=joint_obs_size, action_space=env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
                 target_update_interval=target_update_interval, automatic_entropy_tuning=automatic_entropy_tuning,
-                hidden_size=hidden_size, learning_rate=learning_rate, device=device, env=env)
+                hidden_size=hidden_size, learning_rate=learning_rate, device=device, env=env, entropy_scalar=0.1)
 
     agent.load_checkpoint()
 
