@@ -18,6 +18,7 @@ class SAC(object):
         self.alpha = alpha
         self.env : RoboGymEnv = env
 
+
         self.policy_type = policy
         self.target_update_interval = target_update_interval
 
@@ -66,6 +67,7 @@ class SAC(object):
             print("AET Warmup Steps:    ", self.aet_warmup_steps)
             print("Target Entropy:      ", self.target_entropy)
         print("Alpha:               ", self.alpha)
+        print("Sim Gravity:", self.env.model.opt.gravity)
         print("-" * 20)
         
 
@@ -116,7 +118,7 @@ class SAC(object):
             #img = env._get_image_obs()
 
 
-            time.sleep(0.005)
+            time.sleep(0.001)
             # time.sleep(0.1)
 
             # Ignore the "done" signal if it comes from hitting the time horizon.

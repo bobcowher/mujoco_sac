@@ -27,11 +27,12 @@ if __name__ == '__main__':
     automatic_entropy_tuning = False
     hidden_size = 512 
     learning_rate = 0.0001
-    max_episode_steps=2000 # max episode steps
+    step_repeat = 4
+    max_episode_steps=2000 / step_repeat # max episode steps
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    env = RoboGymEnv(robot="boston_dynamics_spot", max_episode_steps=max_episode_steps, step_repeat=1)
+    env = RoboGymEnv(robot="boston_dynamics_spot", max_episode_steps=max_episode_steps, step_repeat=step_repeat)
     state, info = env.reset()
 
     joint_obs_size = state['joint_pos'].shape[0] + state['joint_vel'].shape[0]
