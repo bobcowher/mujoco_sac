@@ -18,6 +18,7 @@ if __name__ == '__main__':
     replay_buffer_size = 500000
     episodes = 10000
     warmup = 20
+    aet_warmup = 150
     batch_size = 64 
     pretrain_batch_size = 64
     update_interval = 2 
@@ -30,10 +31,10 @@ if __name__ == '__main__':
     automatic_entropy_tuning = True 
     hidden_size = 512 
     learning_rate = 0.0001
-    step_repeat = 4 
+    step_repeat = 2 
     max_episode_steps=2000 / step_repeat # max episode steps
     alpha_decay = 0.0002
-    entropy_scalar = 0.08
+    entropy_scalar = 0.1
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -59,7 +60,7 @@ if __name__ == '__main__':
     agent = SAC(joint_obs_size, env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
                 target_update_interval=target_update_interval, automatic_entropy_tuning=automatic_entropy_tuning,
                 hidden_size=hidden_size, learning_rate=learning_rate, device=device, env=env, 
-                entropy_scalar=entropy_scalar)
+                entropy_scalar=entropy_scalar, aet_warmup_episodes=150)
 
     # Tensorboard
     episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size} A: {alpha} ES: {entropy_scalar} UI: {update_interval} TUI: {target_update_interval} SR: {step_repeat} - AET: {automatic_entropy_tuning} - low-alpha-lr"

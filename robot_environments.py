@@ -104,6 +104,11 @@ class RoboGymEnv(gym.Env):
                 break
 
         obs = self._get_obs()
+        
+        if not done:
+            self.current_step += 1
+            if self.current_step >= self.max_episode_steps:
+                done = True
 
         return obs, total_reward, done, truncated, info
 
@@ -135,11 +140,6 @@ class RoboGymEnv(gym.Env):
 
         truncated = False    # Set to True if time limit or failure
         info = {}
-
-        if not done:
-            self.current_step += 1
-            if self.current_step >= self.max_episode_steps:
-                done = True
 
         return reward, done, truncated, info
 

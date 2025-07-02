@@ -11,7 +11,7 @@ from robot_environments import RoboGymEnv
 
 class SAC(object):
     def __init__(self, joint_obs_size, action_space, gamma, tau, alpha, policy, target_update_interval,
-                 automatic_entropy_tuning, hidden_size, learning_rate, device, env, entropy_scalar):
+                 automatic_entropy_tuning, hidden_size, learning_rate, device, env, entropy_scalar, aet_warmup_episodes):
 
         self.gamma = gamma
         self.tau = tau
@@ -24,7 +24,7 @@ class SAC(object):
 
         self.automatic_entropy_tuning = automatic_entropy_tuning
         self.device = device
-        self.aet_warmup_episodes = 150
+        self.aet_warmup_episodes = aet_warmup_episodes
         self.aet_warmup_steps = self.aet_warmup_episodes * self.env.max_episode_steps 
 
         if self.automatic_entropy_tuning:

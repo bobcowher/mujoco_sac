@@ -21,13 +21,13 @@ if __name__ == '__main__':
     updates_per_step = 1
     gamma = 0.99
     tau = 0.005
-    alpha = 0.1 # Temperature parameter.
+    alpha = 0.12 # Temperature parameter.
     policy = "Gaussian"
     target_update_interval = 1
     automatic_entropy_tuning = False
     hidden_size = 512 
     learning_rate = 0.0001
-    step_repeat = 4
+    step_repeat = 2
     max_episode_steps=2000 / step_repeat # max episode steps
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
