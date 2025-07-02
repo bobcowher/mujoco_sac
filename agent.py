@@ -11,7 +11,7 @@ from robot_environments import RoboGymEnv
 
 class SAC(object):
     def __init__(self, joint_obs_size, action_space, gamma, tau, alpha, policy, target_update_interval,
-                 automatic_entropy_tuning, hidden_size, learning_rate, device, env, entropy_scalar, aet_warmup_episodes):
+                 automatic_entropy_tuning, hidden_size, learning_rate, device, env, entropy_scalar, aet_warmup_episodes=100):
 
         self.gamma = gamma
         self.tau = tau
