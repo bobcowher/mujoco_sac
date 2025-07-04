@@ -94,41 +94,26 @@ class RoboGymEnv(gym.Env):
 
     def step(self, action):
 
-        total_reward = 0
+        reward = 0
+    
+        done = False
+        truncated = False    # Set to True if time limit or failure
         
         for i in range(self.step_repeat):
-            reward, done, truncated, info = self._step(action)
-            total_reward += reward
+            self._step(action)
             
-            if done:
-                break
-
         obs = self._get_obs()
         
         if not done:
             self.current_step += 1
             if self.current_step >= self.max_episode_steps:
                 done = True
-
-        return obs, total_reward, done, truncated, info
-
-    def _step(self, action):
-        # Start with done as false.
-        done = False
-
-        action = self.jnt_mid + action * self.jnt_half
-        # Apply control input
-        
-        self.data.ctrl[:] = action
-        
-
-        # Step the simulation
-        mujoco.mj_step(self.model, self.data)
+                truncated = True
 
         # Get current Goal Distance and Compute Reward
         current_goal_distance = self.get_distance_to_goal()
         progress = self.last_goal_distance - current_goal_distance
-        reward = np.clip(100 * progress, -10.0, 10.0)                             # keep range stable
+        reward = np.clip(100 * progress, -20.0, 20.0)                             # keep range stable
 
         # Set last goal distance to current goal distance. 
         self.last_goal_distance = current_goal_distance
@@ -138,10 +123,27 @@ class RoboGymEnv(gym.Env):
             reward += 100
             done = True
 
-        truncated = False    # Set to True if time limit or failure
+        if(self.get_robot_height() < 0.2):
+            reward = -1
+            done = True
+            truncated = True
+
         info = {}
 
-        return reward, done, truncated, info
+        return obs, reward, done, truncated, info
+
+
+    def _step(self, action):
+        # Start with done as false.
+        done = False
+
+        action = self.jnt_mid + action * self.jnt_half
+        # Apply control input
+        
+        self.data.ctrl[:] = action
+
+        # Step the simulation
+        mujoco.mj_step(self.model, self.data)
 
 
     def _get_image_obs(self):

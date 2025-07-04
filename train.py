@@ -18,7 +18,7 @@ if __name__ == '__main__':
     replay_buffer_size = 500000
     episodes = 10000
     warmup = 20
-    aet_warmup = 150
+    aet_warmup = 500
     batch_size = 64 
     pretrain_batch_size = 64
     update_interval = 2 
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     min_alpha = alpha
     policy = "Gaussian"
     target_update_interval = 1
-    automatic_entropy_tuning = True 
+    automatic_entropy_tuning = False 
     hidden_size = 512 
     learning_rate = 0.0001
     step_repeat = 2 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     agent = SAC(joint_obs_size, env.action_space, gamma=gamma, tau=tau, alpha=alpha, policy=policy,
                 target_update_interval=target_update_interval, automatic_entropy_tuning=automatic_entropy_tuning,
                 hidden_size=hidden_size, learning_rate=learning_rate, device=device, env=env, 
-                entropy_scalar=entropy_scalar, aet_warmup_episodes=150)
+                entropy_scalar=entropy_scalar, aet_warmup_episodes=aet_warmup)
 
     # Tensorboard
     episode_identifier = f"Adam - lr: {learning_rate} HL: {hidden_size} A: {alpha} ES: {entropy_scalar} UI: {update_interval} TUI: {target_update_interval} SR: {step_repeat} - AET: {automatic_entropy_tuning} - low-alpha-lr"
