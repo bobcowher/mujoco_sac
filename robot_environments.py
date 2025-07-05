@@ -124,7 +124,7 @@ class RoboGymEnv(gym.Env):
             done = True
 
         if(self.get_robot_height() < 0.2):
-            reward = -1
+            reward = -10
             done = True
             truncated = True
 

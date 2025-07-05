@@ -16,9 +16,9 @@ if __name__ == '__main__':
 
     env_name = "boston_dynamics_spot"
     replay_buffer_size = 500000
-    episodes = 10000
+    episodes = 20000
     warmup = 20
-    aet_warmup = 500
+    aet_warmup = 2000
     batch_size = 64 
     pretrain_batch_size = 64
     update_interval = 2 
@@ -28,11 +28,11 @@ if __name__ == '__main__':
     min_alpha = alpha
     policy = "Gaussian"
     target_update_interval = 1
-    automatic_entropy_tuning = False 
+    automatic_entropy_tuning = True 
     hidden_size = 512 
     learning_rate = 0.0001
     step_repeat = 2 
-    max_episode_steps=2000 / step_repeat # max episode steps
+    max_episode_steps=2000 # max episode steps
     alpha_decay = 0.0002
     entropy_scalar = 0.1
 
