@@ -18,7 +18,7 @@ if __name__ == '__main__':
     replay_buffer_size = 500000
     episodes = 20000
     warmup = 20
-    aet_warmup = 2000
+    aet_warmup = 5000
     batch_size = 64 
     pretrain_batch_size = 64
     update_interval = 2 

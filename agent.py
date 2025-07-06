@@ -25,7 +25,6 @@ class SAC(object):
         self.automatic_entropy_tuning = automatic_entropy_tuning
         self.device = device
         self.aet_warmup_episodes = aet_warmup_episodes
-        self.aet_warmup_steps = self.aet_warmup_episodes * self.env.max_episode_steps 
 
         if self.automatic_entropy_tuning:
             # target_entropy ≈ −|A|
@@ -64,7 +63,6 @@ class SAC(object):
         
         if(self.automatic_entropy_tuning):
             print("AET Warmup Episodes: ", self.aet_warmup_episodes)
-            print("AET Warmup Steps:    ", self.aet_warmup_steps)
             print("Target Entropy:      ", self.target_entropy)
         print("Alpha:               ", self.alpha)
         print("Sim Gravity:", self.env.model.opt.gravity)
@@ -155,7 +153,7 @@ class SAC(object):
 
                 if memory.can_sample(batch_size=batch_size) and not warmup_episode and episode_steps % update_interval == 0:
                     # Update parameters of all the networks
-                    critic_1_loss, critic_2_loss, policy_loss, alpha = self.update_parameters(memory, batch_size, updates)
+                    critic_1_loss, critic_2_loss, policy_loss, alpha = self.update_parameters(memory, batch_size, updates, i_episode)
 
                     summary_writer.add_scalar('loss/critic_1', critic_1_loss, updates)
                     summary_writer.add_scalar('loss/critic_2', critic_2_loss, updates)
@@ -199,7 +197,7 @@ class SAC(object):
             if i_episode % 10 == 0:
                 self.save_checkpoint()
 
-    def update_parameters(self, memory, batch_size, updates, human=False):
+    def update_parameters(self, memory, batch_size, updates, episode, human=False):
         # Sample a batch from memory
         state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample_buffer(batch_size=batch_size)
                 # state_batch = state_batch.to(self.device)
@@ -242,7 +240,7 @@ class SAC(object):
         policy_loss.backward()
         self.policy_optim.step()
 
-        if self.automatic_entropy_tuning and updates > self.aet_warmup_steps:
+        if self.automatic_entropy_tuning and episode > self.aet_warmup_episodes:
             alpha_loss = (self.log_alpha.exp() *
                          (-log_pi - self.target_entropy).detach()).mean()
 
