@@ -18,13 +18,13 @@ if __name__ == '__main__':
     replay_buffer_size = 500000
     episodes = 20000
     warmup = 20
-    aet_warmup = 5000
+    aet_warmup = 3000
     batch_size = 64 
     pretrain_batch_size = 64
     update_interval = 2 
     gamma = 0.99
     tau = 0.005
-    alpha = 0.1 # Temperature parameter.
+    alpha = 0.12 # Temperature parameter.
     min_alpha = alpha
     policy = "Gaussian"
     target_update_interval = 1
