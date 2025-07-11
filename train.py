@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     env_name = "boston_dynamics_spot"
     replay_buffer_size = 500000
-    episodes = 20000
+    episodes = 10000
     warmup = 20
     aet_warmup = 3000
     batch_size = 64 
@@ -24,11 +24,11 @@ if __name__ == '__main__':
     update_interval = 2 
     gamma = 0.99
     tau = 0.005
-    alpha = 0.12 # Temperature parameter.
+    alpha = 0.15 # Temperature parameter.
     min_alpha = alpha
     policy = "Gaussian"
     target_update_interval = 1
-    automatic_entropy_tuning = True 
+    automatic_entropy_tuning = False 
     hidden_size = 512 
     learning_rate = 0.0001
     step_repeat = 2 
