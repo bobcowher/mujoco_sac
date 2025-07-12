@@ -24,7 +24,7 @@ if __name__ == '__main__':
     update_interval = 2 
     gamma = 0.99
     tau = 0.005
-    alpha = 0.15 # Temperature parameter.
+    alpha = 0.2 # Temperature parameter.
     min_alpha = alpha
     policy = "Gaussian"
     target_update_interval = 1
