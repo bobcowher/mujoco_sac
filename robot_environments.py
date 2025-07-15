@@ -123,10 +123,14 @@ class RoboGymEnv(gym.Env):
             reward += 100
             done = True
 
-        if(self.get_robot_height() < 0.2):
-            reward = -10
-            done = True
-            truncated = True
+        # Orientation reward: Prevent robot from flipping over and back-crawling
+        # The quaternion w component (index 0) indicates if robot is upright
+        # w > 0 means robot is right-side up, w < 0 means upside down
+        body_quat = self.data.xquat[self.model.body("body").id]
+        if body_quat[0] < 0:  # Robot is upside down
+            reward -= 2.0  # Continuous penalty for being upside down
+        else:
+            reward += 0.1  # Small bonus for maintaining upright orientation
 
         info = {}
 
